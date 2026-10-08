@@ -1,0 +1,23 @@
+{
+  "parent": "morphwatch:power_up",
+  "display": {
+    "icon": {
+      "item": "minecraft:redstone_block"
+    },
+    "title": {
+      "text": "Fully Charged"
+    },
+    "description": {
+      "text": "Hold R to fire a charged power"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

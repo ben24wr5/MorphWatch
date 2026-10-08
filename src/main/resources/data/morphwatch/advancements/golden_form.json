@@ -1,0 +1,23 @@
+{
+  "parent": "morphwatch:first_scan",
+  "display": {
+    "icon": {
+      "item": "minecraft:golden_apple"
+    },
+    "title": {
+      "text": "Gold Standard"
+    },
+    "description": {
+      "text": "Scan 10 of the same mob to unlock a Golden form"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

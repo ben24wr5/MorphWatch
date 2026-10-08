@@ -1,0 +1,23 @@
+{
+  "parent": "morphwatch:power_up",
+  "display": {
+    "icon": {
+      "item": "minecraft:beacon"
+    },
+    "title": {
+      "text": "Master of Powers"
+    },
+    "description": {
+      "text": "Use the R power of every mob"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

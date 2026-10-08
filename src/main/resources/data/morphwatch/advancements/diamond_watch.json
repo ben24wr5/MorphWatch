@@ -1,0 +1,32 @@
+{
+  "parent": "morphwatch:root",
+  "display": {
+    "icon": {
+      "item": "morphwatch:morph_watch_diamond"
+    },
+    "title": {
+      "text": "Shiny Upgrade"
+    },
+    "description": {
+      "text": "Upgrade to a Diamond Morph Watch"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "has": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "morphwatch:morph_watch_diamond"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

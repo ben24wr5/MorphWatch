@@ -1,0 +1,32 @@
+{
+  "parent": "morphwatch:diamond_watch",
+  "display": {
+    "icon": {
+      "item": "morphwatch:morph_watch_netherite"
+    },
+    "title": {
+      "text": "Ultimate Watch"
+    },
+    "description": {
+      "text": "Upgrade to a Netherite Morph Watch"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "has": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "morphwatch:morph_watch_netherite"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

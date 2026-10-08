@@ -1,0 +1,23 @@
+{
+  "parent": "morphwatch:root",
+  "display": {
+    "icon": {
+      "item": "minecraft:blaze_powder"
+    },
+    "title": {
+      "text": "Power Up"
+    },
+    "description": {
+      "text": "Use a mob power with R"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

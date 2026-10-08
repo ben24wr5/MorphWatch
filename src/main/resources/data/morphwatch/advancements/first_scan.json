@@ -1,0 +1,23 @@
+{
+  "parent": "morphwatch:root",
+  "display": {
+    "icon": {
+      "item": "minecraft:spyglass"
+    },
+    "title": {
+      "text": "DNA Collector"
+    },
+    "description": {
+      "text": "Wear the watch and scan your first mob with G"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

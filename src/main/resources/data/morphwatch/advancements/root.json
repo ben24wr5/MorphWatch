@@ -1,0 +1,32 @@
+{
+  "display": {
+    "icon": {
+      "item": "morphwatch:morph_watch"
+    },
+    "title": {
+      "text": "Morph Watch"
+    },
+    "description": {
+      "text": "Craft a Morph Watch"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false,
+    "background": "minecraft:textures/block/gold_block.png"
+  },
+  "criteria": {
+    "has": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "morphwatch:morph_watch"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

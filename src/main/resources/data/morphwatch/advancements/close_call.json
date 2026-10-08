@@ -1,0 +1,23 @@
+{
+  "parent": "morphwatch:root",
+  "display": {
+    "icon": {
+      "item": "minecraft:totem_of_undying"
+    },
+    "title": {
+      "text": "Close Call"
+    },
+    "description": {
+      "text": "Get saved by the watch's auto-escape"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

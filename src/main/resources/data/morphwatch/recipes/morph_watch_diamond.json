@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    " D ",
+    "DWD",
+    " D "
+  ],
+  "key": {
+    "D": { "item": "minecraft:diamond" },
+    "W": { "item": "morphwatch:morph_watch" }
+  },
+  "result": { "item": "morphwatch:morph_watch_diamond" }
+}
