@@ -44,7 +44,7 @@ public final class WatchModel {
     /** Front of the dial when it's closed (it sticks out of the case a little). */
     static final float FACE_FRONT_Z = -3.6F;
     /** How far the dial pops up out of its case when the dial opens (pixels). */
-    static final float POP_DISTANCE = 1.5F;
+    static final float POP_DISTANCE = 2.0F;
 
     private static final Parts WIDE = new Parts(false);
     private static final Parts SLIM = new Parts(true);
