@@ -186,6 +186,14 @@ public final class WatchModel {
         poseStack.popPose();
     }
 
+    /** The middle of the raised dial (inside the face), in the current pose's space. */
+    static Vector3f dialCentre(PoseStack poseStack, Player player, float pop) {
+        Parts p = parts(player);
+        float lift = POP_DISTANCE * Mth.clamp(pop, 0.0F, 1.0F);
+        Vector3f v = new Vector3f(p.centreX() / 16.0F, WRIST_Y / 16.0F, (FACE_FRONT_Z - lift + 0.5F) / 16.0F);
+        return poseStack.last().pose().transformPosition(v);
+    }
+
     /** The point just above the raised dial, in the current pose's space. The hologram rises from here. */
     static Vector3f dialPoint(PoseStack poseStack, Player player, float pop) {
         Parts p = parts(player);

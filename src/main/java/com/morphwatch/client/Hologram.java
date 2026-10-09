@@ -162,14 +162,24 @@ public final class Hologram {
         return Mth.lerp(t, prev, steps) * -DEGREES_PER_CLICK;
     }
 
-    /** -1, 0 or 1: which way the dial is turning right now (for the hand twist). */
-    static float turnTwist(Player player, float partialTick) {
+    /**
+     * How far round the hand has moved with the dial (degrees): it turns with the dial during
+     * a click, then slides back to where it grips.
+     */
+    static float handFollowDegrees(Player player, float partialTick) {
         float now = player.level().getGameTime() + partialTick;
         float t = (now - changedAt(player)) / SWITCH_TICKS;
-        if (t < 0.0F || t > 1.0F) return 0.0F;
-        int dir = player == Minecraft.getInstance().player
-                ? Integer.signum(ClientState.dialTurnSteps - ClientState.dialTurnPrevSteps) : 1;
-        return dir * Mth.sin((float) Math.PI * t);
+        if (t < 0.0F || t > 1.8F) return 0.0F;
+        int dir;
+        if (player == Minecraft.getInstance().player) {
+            dir = Integer.signum(ClientState.dialTurnSteps - ClientState.dialTurnPrevSteps);
+        } else {
+            Remote remote = REMOTE.get(player.getUUID());
+            dir = remote == null ? 0 : Integer.signum(remote.turnSteps() - remote.prevTurnSteps());
+        }
+        float full = dir * DEGREES_PER_CLICK;
+        if (t <= 1.0F) return full * TransformAnims.ease(t);             // turning with the dial
+        return full * (1.0F - TransformAnims.ease((t - 1.0F) / 0.8F));   // letting go and re-gripping
     }
 
     private static MorphForm previousForm(Player player) {
@@ -346,24 +356,32 @@ public final class Hologram {
         float pop = rise;
         WatchModel.renderWatch(poseStack, buffers, light, player, true, now, pop, dialTurnDegrees(player, partialTick));
         Vector3f dial = WatchModel.dialPoint(poseStack, player, pop);
+        Vector3f dialCentre = WatchModel.dialCentre(poseStack, player, pop);
         poseStack.popPose();
+        // The way the watch face points (out of the front of the wrist)
+        Vector3f dialAxis = leftRot.transform(new Vector3f(0.0F, 0.0F, -1.0F)).normalize();
 
-        // Right hand reaching in from the right, ready to turn the dial
+        // Right hand: holds the side of the dial (lower than the face, so the face stays visible)
+        // and turns round with the dial while you scroll, then slides back to its grip.
         float rightCentreX = slim ? -0.5F : -1.0F;
-        Vector3f handTarget = new Vector3f(wrist).add(0.17F, -0.06F, 0.08F);
-        Quaternionf rightRot = armRotation(new Vector3f(-0.55F, 0.35F, -0.9F), new Vector3f(0.0F, 1.0F, 0.35F));
+        Vector3f side = new Vector3f(1.0F, -0.35F, 0.0F);                       // grip on the right of the dial
+        side.sub(new Vector3f(dialAxis).mul(side.dot(dialAxis))).normalize();
+        float follow = handFollowDegrees(player, partialTick);
+        new Quaternionf().fromAxisAngleDeg(dialAxis.x(), dialAxis.y(), dialAxis.z(), follow).transform(side);
+        float gripRadius = (1.5F + 2.3F) / 16.0F;                                // dial edge + half a hand
+        Vector3f fingertips = new Vector3f(dialCentre)
+                .add(new Vector3f(side).mul(gripRadius))
+                .sub(new Vector3f(dialAxis).mul(1.2F / 16.0F));
+        Vector3f shoulder = new Vector3f(dialCentre).add(0.45F, -0.55F, 0.35F);   // off the bottom right of the screen
+        Vector3f rightAlong = new Vector3f(fingertips).sub(shoulder);
+        Quaternionf rightRot = armRotation(rightAlong, new Vector3f(side).negate());
         Vector3f rightHandLocal = new Vector3f(rightCentreX / 16.0F, 10.0F / 16.0F, 0.0F);
-        Vector3f rightOrigin = new Vector3f(handTarget).sub(rightRot.transform(new Vector3f(rightHandLocal)));
+        Vector3f rightOrigin = new Vector3f(fingertips).sub(rightRot.transform(new Vector3f(rightHandLocal)));
         ModelPart rightArm = spare.rightArm;
         resetPart(rightArm);
         poseStack.pushPose();
         poseStack.translate(rightOrigin.x(), rightOrigin.y(), rightOrigin.z());
         poseStack.mulPose(rightRot);
-        // Twist the hand as it turns the dial
-        float twist = turnTwist(player, partialTick) * 35.0F;
-        poseStack.translate(rightCentreX / 16.0F, 0.0F, 0.0F);
-        poseStack.mulPose(Axis.YP.rotationDegrees(twist));
-        poseStack.translate(-rightCentreX / 16.0F, 0.0F, 0.0F);
         WatchModel.renderArm(poseStack, buffers, light, player, rightArm, spare.rightSleeve, PlayerModelPart.RIGHT_SLEEVE);
         poseStack.popPose();
 
