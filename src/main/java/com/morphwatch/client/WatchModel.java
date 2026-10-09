@@ -40,11 +40,11 @@ public final class WatchModel {
     /** Wrist height (pixels down the arm) where the dial sits. */
     public static final float WRIST_Y = 8.0F;
     /** Front of the gold case on the strap (pixels, -z is out from the front of the wrist). */
-    static final float CASE_FRONT_Z = -3.3F;
+    static final float CASE_FRONT_Z = -2.8F;
     /** Front of the dial when it's closed (it sticks out of the case a little). */
-    static final float FACE_FRONT_Z = -3.6F;
+    static final float FACE_FRONT_Z = -3.1F;
     /** The dial plate is shrunk by this much on every side so it fits the case exactly. */
-    static final float FACE_SHRINK = 0.2F;
+    static final float FACE_SHRINK = 0.0F;
     /** How far the dial pops up out of its case when the dial opens (pixels). */
     static final float POP_DISTANCE = 2.0F;
 
@@ -93,11 +93,10 @@ public final class WatchModel {
                 PartPose.ZERO);
         // Front of the wrist: a gold case sitting right on the strap, the dial sits in it.
         // The strap's front surface is at z = -2.3 (it's puffed out by 0.3).
-        // Exactly the same outline as the strap (strap is 2 tall, puffed out by 0.3 all round)
+        // Square gold base, set into the strap (half of it sinks into the red strap)
         root.addOrReplaceChild("housing", CubeListBuilder.create()
                         .texOffs(0, 16)
-                        .addBox(-1.0F, 7.0F, CASE_FRONT_Z, armWidth, 2.0F, -CASE_FRONT_Z - 2.3F,
-                                new CubeDeformation(0.3F, 0.3F, 0.0F)),
+                        .addBox(-1.0F, 6.0F, CASE_FRONT_Z, armWidth, 4.0F, 1.0F),
                 PartPose.ZERO);
         root.addOrReplaceChild("riser", CubeListBuilder.create()
                         .texOffs(12, 16)
@@ -105,8 +104,7 @@ public final class WatchModel {
                 PartPose.ZERO);
         root.addOrReplaceChild("top_face", CubeListBuilder.create()
                         .texOffs(16, 8)
-                        .addBox(-1.0F + (armWidth - 3.0F) / 2.0F, 6.5F, FACE_FRONT_Z, 3.0F, 3.0F, 1.0F,
-                                new CubeDeformation(-FACE_SHRINK)),
+                        .addBox(-1.0F + (armWidth - 3.0F) / 2.0F, 6.5F, FACE_FRONT_Z, 3.0F, 3.0F, 1.0F),
                 PartPose.ZERO);
         return LayerDefinition.create(mesh, 32, 32);
     }
@@ -164,7 +162,7 @@ public final class WatchModel {
             float lift = POP_DISTANCE * Mth.clamp(pop, 0.0F, 1.0F);
             // The stem joining the case to the popped-up dial. It stops just under the dial
             // so it never pokes through the watch face.
-            float stem = lift - 0.45F;
+            float stem = lift - 0.6F;
             if (stem > 0.01F) {
                 poseStack.pushPose();
                 poseStack.translate(0.0F, 0.0F, CASE_FRONT_Z / 16.0F);
