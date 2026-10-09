@@ -148,7 +148,7 @@ public final class Transformer {
         MorphForm form = MorphForm.byOrdinal(ordinal);
         if (form == MorphForm.NONE) return;
         if (!MorphData.isUnlocked(player, form)) {
-            WatchActions.tell(player, "That mob is locked: find it, look at it and press G to scan it",
+            WatchActions.tell(player, "That mob is locked: find it, look at it and press V to scan it",
                     ChatFormatting.YELLOW);
             return;
         }

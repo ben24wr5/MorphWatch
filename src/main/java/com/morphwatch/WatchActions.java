@@ -31,10 +31,10 @@ public final class WatchActions {
         MorphData.sync(player);
         player.level().playSound(null, player.getX(), player.getY(), player.getZ(),
                 SoundEvents.ARMOR_EQUIP_GOLD, SoundSource.PLAYERS, 1.0F, 1.2F);
-        tell(player, "Morph Watch on! Look at a mob and press G to scan it", ChatFormatting.GOLD);
+        tell(player, "Morph Watch on! Look at a mob and press V to scan it", ChatFormatting.GOLD);
     }
 
-    /** G while looking at a mob: scan it (shoots a beam), unlock it and turn into it. */
+    /** V while looking at a mob: scan it (shoots a beam) and unlock it. Then C transforms you into it. */
     public static void scan(ServerPlayer player, int targetId) {
         if (!requireWatch(player)) return;
         Entity entity = player.level().getEntity(targetId);
@@ -55,7 +55,8 @@ public final class WatchActions {
         int count = MorphData.scanCount(player, form);
 
         if (!wasUnlocked) {
-            tell(player, "New mob unlocked: " + form.displayName().getString() + "!", ChatFormatting.GREEN);
+            tell(player, "New mob unlocked: " + form.displayName().getString() + "! Press C to transform",
+                    ChatFormatting.GREEN);
             MorphAdvancements.award(player, MorphAdvancements.FIRST_SCAN);
             if (MorphData.unlockedCount(player) >= MorphForm.mobs().size()) {
                 MorphAdvancements.award(player, MorphAdvancements.ALL_SCANS);
@@ -73,11 +74,10 @@ public final class WatchActions {
         if (MorphData.getForm(player) == form) {
             // Already this mob: refresh hearts in case it just turned golden.
             MorphData.applyHealth(player, form);
-            MorphData.sync(player);
-        } else {
-            MorphData.sync(player);
-            Transformer.begin(player, form);
+        } else if (wasUnlocked) {
+            tell(player, form.displayName().getString() + " scanned! Press C to transform", ChatFormatting.AQUA);
         }
+        MorphData.sync(player);
     }
 
     /** Picked a mob in the menu. */

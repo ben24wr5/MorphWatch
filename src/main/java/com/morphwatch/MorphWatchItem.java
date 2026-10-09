@@ -47,8 +47,8 @@ public class MorphWatchItem extends Item {
         }
         tooltip.add(Component.literal("Right-click: wear it on your wrist").withStyle(ChatFormatting.GRAY));
         tooltip.add(Component.literal("While worn:").withStyle(ChatFormatting.GOLD));
-        tooltip.add(Component.literal(" G at a mob: scan it   G: mob menu").withStyle(ChatFormatting.GRAY));
-        tooltip.add(Component.literal(" Sneak + G: back to human").withStyle(ChatFormatting.GRAY));
+        tooltip.add(Component.literal(" V at a mob: scan it   C: transform").withStyle(ChatFormatting.GRAY));
+        tooltip.add(Component.literal(" X: dial (scroll to pick)   Sneak + V: human").withStyle(ChatFormatting.GRAY));
         tooltip.add(Component.literal(" R: power (hold to charge)   Z: second power").withStyle(ChatFormatting.GRAY));
         tooltip.add(Component.literal(" J: take the watch off").withStyle(ChatFormatting.GRAY));
     }

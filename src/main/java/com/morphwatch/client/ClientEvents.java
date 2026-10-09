@@ -46,8 +46,8 @@ public final class ClientEvents {
             "key.morphwatch.ability", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_R, CATEGORY);
     public static final KeyMapping POWER2_KEY = new KeyMapping(
             "key.morphwatch.ability2", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_Z, CATEGORY);
-    public static final KeyMapping TRANSFORM_KEY = new KeyMapping(
-            "key.morphwatch.transform", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_G, CATEGORY);
+    public static final KeyMapping SCAN_KEY = new KeyMapping(
+            "key.morphwatch.scan", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_V, CATEGORY);
     public static final KeyMapping DIAL_KEY = new KeyMapping(
             "key.morphwatch.dial", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_X, CATEGORY);
     public static final KeyMapping SLAM_KEY = new KeyMapping(
@@ -63,7 +63,7 @@ public final class ClientEvents {
         public static void onRegisterKeys(RegisterKeyMappingsEvent event) {
             event.register(POWER_KEY);
             event.register(POWER2_KEY);
-            event.register(TRANSFORM_KEY);
+            event.register(SCAN_KEY);
             event.register(DIAL_KEY);
             event.register(SLAM_KEY);
             event.register(TAKE_OFF_KEY);
@@ -258,18 +258,22 @@ public final class ClientEvents {
                 if (inGame) send(WatchActionPacket.POWER_2, crosshairTarget(mc));
             }
 
-            // G: look at a mob to scan it; otherwise open the mob menu. Sneak + G = human.
-            while (TRANSFORM_KEY.consumeClick()) {
+            // V: look at a mob and press V to scan it (then C transforms you). Sneak + V = back to human.
+            while (SCAN_KEY.consumeClick()) {
                 if (!inGame) continue;
                 if (!MorphData.isWearing(mc.player)) {
                     send(WatchActionPacket.SCAN, -1); // server explains how to put it on
                 } else if (mc.player.isShiftKeyDown()) {
                     send(WatchActionPacket.HUMAN, 0);
                 } else if (crosshairTarget(mc) >= 0) {
+                    Entity target = mc.level.getEntity(crosshairTarget(mc));
+                    MorphForm scanned = target == null ? null : MorphForm.byType(target.getType());
+                    if (scanned != null) Dial.pointAt(scanned);
                     send(WatchActionPacket.SCAN, crosshairTarget(mc));
                 } else {
-                    Dial.close(mc, true);
-                    mc.setScreen(new MorphMenuScreen());
+                    mc.player.displayClientMessage(net.minecraft.network.chat.Component
+                            .literal("Look at a mob and press V to scan it")
+                            .withStyle(net.minecraft.ChatFormatting.GRAY), true);
                 }
             }
 

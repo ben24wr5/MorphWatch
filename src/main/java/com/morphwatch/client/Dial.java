@@ -66,6 +66,17 @@ public final class Dial {
         sendDial();
     }
 
+    /** You just scanned this mob: the dial moves to it so C transforms you into it. */
+    public static void pointAt(MorphForm form) {
+        int i = choices().indexOf(form);
+        if (i < 0 || i == Math.floorMod(ClientState.dialIndex, choices().size())) return;
+        ClientState.dialPrevIndex = ClientState.dialIndex;
+        ClientState.dialIndex = i;
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player != null) ClientState.dialChangedAt = mc.player.level().getGameTime();
+        if (ClientState.dialOpen) sendDial();
+    }
+
     public static void close(Minecraft mc, boolean tellServer) {
         if (!ClientState.dialOpen) return;
         ClientState.dialOpen = false;
@@ -93,15 +104,11 @@ public final class Dial {
     public static void slam(Minecraft mc) {
         Player player = mc.player;
         if (player == null) return;
-        if (!ClientState.dialOpen) {
-            player.displayClientMessage(Component.literal("Press X to pop up the dial first")
-                    .withStyle(ChatFormatting.GRAY), true);
-            return;
-        }
+        // C works with the dial up (the mob on the dial) or down (the mob you last scanned / picked)
         MorphForm form = selected();
         if (!MorphData.isUnlocked(player, form)) {
             // Locked mob: a little buzz, the dial stays up
-            player.displayClientMessage(Component.literal("That mob is locked: find it, look at it and press G to scan it")
+            player.displayClientMessage(Component.literal("That mob is locked: find it, look at it and press V to scan it")
                     .withStyle(ChatFormatting.YELLOW), true);
             Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.NOTE_BLOCK_BASS.value(), 0.6F, 0.8F));
             return;
