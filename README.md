@@ -180,6 +180,8 @@ Scanning a mob counts toward its Golden form. Scan **10 different mobs of the sa
 
 **Crafting the watch:** red wool top and bottom middle, ender pearl in the centre, gold blocks in the other 6 slots.
 
+All three recipes (Morph Watch, Recharge Crystal, Watch Workbench) are made in a **crafting table** and show up in its green recipe book.
+
 **Upgrading it:** while wearing the watch, hold one of these in your right hand and **left-click** to put it into the watch. Each uses up 1 item, works on its own, and they all stack. The watch shows a gem for each upgrade (in the corners of the gold case, or on the strap when your arm is down), the watch item shimmers, and the panel in the top-left shows the gems too. Upgrades stay in the watch when you take it off.
 
 | Item | Bonus |

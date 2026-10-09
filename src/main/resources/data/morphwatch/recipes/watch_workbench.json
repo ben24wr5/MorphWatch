@@ -1,10 +1,23 @@
 {
   "type": "minecraft:crafting_shaped",
-  "pattern": [ "GBG", "BTB", "GBG" ],
+  "category": "misc",
+  "pattern": [
+    "GBG",
+    "BTB",
+    "GBG"
+  ],
   "key": {
-    "G": { "item": "minecraft:green_wool" },
-    "B": { "item": "minecraft:black_wool" },
-    "T": { "item": "minecraft:tnt" }
+    "G": {
+      "item": "minecraft:green_wool"
+    },
+    "B": {
+      "item": "minecraft:black_wool"
+    },
+    "T": {
+      "item": "minecraft:tnt"
+    }
   },
-  "result": { "item": "morphwatch:watch_workbench" }
+  "result": {
+    "item": "morphwatch:watch_workbench"
+  }
 }
