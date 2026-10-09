@@ -74,7 +74,7 @@ public final class HudOverlay implements IGuiOverlay {
             }
         }
         // Transform cooldown (the wait between transformations)
-        bar(g, font, "C", x + 4, barY, w - 8, data.getLong(Transformer.TRANSFORM_CD),
+        bar(g, font, "X", x + 4, barY, w - 8, data.getLong(Transformer.TRANSFORM_CD),
                 data.getLong(Transformer.TRANSFORM_CD_LEN), now, false);
 
         // Charge bar while holding G

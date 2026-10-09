@@ -15,7 +15,7 @@ import java.util.List;
 
 /**
  * The watch dial. X pops it up (and puts it away), the scroll wheel turns it
- * (up = right / next, down = left / previous), C slams the watch and transforms you.
+ * (up = right / next, down = left / previous), right-click slams the watch and transforms you.
  * Every mob is on the dial: scanned ones show their hologram (the one you scanned last comes
  * first), locked ones show a "?".
  */
@@ -102,11 +102,11 @@ public final class Dial {
         sendDial();
     }
 
-    /** C: slam the watch. Shakes the screen and transforms into the mob on the dial. */
+    /** Right-click with the dial up: slam the watch. Shakes the screen and transforms into the mob on the dial. */
     public static void slam(Minecraft mc) {
         Player player = mc.player;
         if (player == null) return;
-        // C works with the dial up (the mob on the dial) or down (the mob you last scanned / picked)
+        // Only called with the dial up: transforms into the mob on the dial
         MorphForm form = selected();
         if (!MorphData.isUnlocked(player, form)) {
             // Locked mob: a little buzz, the dial stays up

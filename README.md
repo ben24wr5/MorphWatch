@@ -9,10 +9,10 @@ A gold watch with a red strap that you wear on your wrist. Scan any of the 77 mo
 | Key | What happens |
 |---|---|
 | **V** while looking at a mob | Scan it with a beam. This unlocks the mob and puts it on your dial |
-| **C** | Slam the watch and transform into the mob on the dial (the one you just scanned, or the one you picked) |
+| **Right-click** (dial up) | Slam the watch and transform into the mob on the dial. The mob you scanned last is always first |
 | **X** | Raise your arm and open the dial (press X again to close it) |
 | **Scroll wheel** (dial up) | Up = turn right (next mob), down = turn left (previous mob). Locked mobs show a **?** |
-| **Sneak + V** | Back to human |
+| **,** (comma) or **Sneak + V** | Back to human |
 | **B** | Super power B |
 | **N** | Super power N |
 | **G** | Mob power. **Hold G** for 1.5 seconds for a charged, double-strength power |
@@ -21,11 +21,11 @@ A gold watch with a red strap that you wear on your wrist. Scan any of the 77 mo
 
 Change keys in Options → Controls → Key Binds → Morph Watch.
 
-The panel in the top-left corner shows your mob, your watch, how many mobs you've scanned, and bars for when G, H, B, N and C (the next transform) are ready. The B and N bars are gold. A beep plays when a power has recharged, and a chime when a super power has.
+The panel in the top-left corner shows your mob, your watch, how many mobs you've scanned, and bars for when G, H, B, N and X (the next transform) are ready. The B and N bars are gold. A beep plays when a power has recharged, and a chime when a super power has.
 
 ## The dial and transformation
 
-Press **X** and a hologram of a mob rises out of your watch. Friends nearby can see it too. Golden forms glow gold and the rest glow blue. Scroll to turn the dial (it clicks), then press **C** to slam the watch. The screen shakes, gold light spirals up your body, you spin and shrink or grow into the mob, there's a flash and a jingle, and the camera pulls out so you can watch it happen.
+Press **X** and a hologram of a mob rises out of your watch. Friends nearby can see it too. Golden forms glow gold and the rest glow green. Scroll to turn the dial (it clicks), then **right-click** to slam the watch. The screen shakes, gold light spirals up your body, you spin and shrink or grow into the mob, there's a flash and a jingle, and the camera pulls out so you can watch it happen.
 
 | Watch | Transform time | Wait before the next transform |
 |---|---|---|

@@ -49,7 +49,7 @@ public final class Abilities {
         }
         MorphForm form = MorphData.getForm(player);
         if (form == MorphForm.NONE) {
-            WatchActions.tell(player, "Transform first: scan a mob with V, then press C", ChatFormatting.RED);
+            WatchActions.tell(player, "Transform first: scan a mob with V, then press X and right-click", ChatFormatting.RED);
             return;
         }
 

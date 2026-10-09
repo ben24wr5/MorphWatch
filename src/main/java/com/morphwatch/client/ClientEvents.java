@@ -55,8 +55,8 @@ public final class ClientEvents {
             "key.morphwatch.scan_mob", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_V, CATEGORY);
     public static final KeyMapping DIAL_KEY = new KeyMapping(
             "key.morphwatch.dial", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_X, CATEGORY);
-    public static final KeyMapping SLAM_KEY = new KeyMapping(
-            "key.morphwatch.slam", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_C, CATEGORY);
+    public static final KeyMapping HUMAN_KEY = new KeyMapping(
+            "key.morphwatch.human", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_COMMA, CATEGORY);
     public static final KeyMapping TAKE_OFF_KEY = new KeyMapping(
             "key.morphwatch.take_off", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_J, CATEGORY);
 
@@ -72,7 +72,7 @@ public final class ClientEvents {
             event.register(POWER2_KEY);
             event.register(SCAN_KEY);
             event.register(DIAL_KEY);
-            event.register(SLAM_KEY);
+            event.register(HUMAN_KEY);
             event.register(TAKE_OFF_KEY);
         }
 
@@ -229,6 +229,16 @@ public final class ClientEvents {
             }
         }
 
+        /** Right-click while the dial is up: slam the watch and transform into the mob on the dial. */
+        @SubscribeEvent
+        public static void onUseKey(InputEvent.InteractionKeyMappingTriggered event) {
+            Minecraft mc = Minecraft.getInstance();
+            if (!event.isUseItem() || !ClientState.dialOpen || mc.screen != null || mc.player == null) return;
+            event.setCanceled(true);
+            event.setSwingHand(false);
+            Dial.slam(mc);
+        }
+
         @SubscribeEvent
         public static void onClientTick(TickEvent.ClientTickEvent event) {
             if (event.phase != TickEvent.Phase.END) return;
@@ -272,7 +282,7 @@ public final class ClientEvents {
                 if (inGame) send(WatchActionPacket.POWER_2, crosshairTarget(mc));
             }
 
-            // V: look at a mob and press V to scan it (then C transforms you). Sneak + V = back to human.
+            // V: look at a mob and press V to scan it (then X + right-click transforms you). Sneak + V = back to human.
             while (SCAN_KEY.consumeClick()) {
                 if (!inGame) continue;
                 if (!MorphData.isWearing(mc.player)) {
@@ -291,15 +301,16 @@ public final class ClientEvents {
                 }
             }
 
-            // X: pop the dial up / put it away.  C: slam!
+            // X: pop the dial up / put it away (right-click while it's up transforms you)
             while (DIAL_KEY.consumeClick()) {
                 if (inGame) {
                     Dial.toggle(mc);
                     scrollBuffer = 0;
                 }
             }
-            while (SLAM_KEY.consumeClick()) {
-                if (inGame) Dial.slam(mc);
+            // , (comma): back to human
+            while (HUMAN_KEY.consumeClick()) {
+                if (inGame) send(WatchActionPacket.HUMAN, 0);
             }
 
             while (TAKE_OFF_KEY.consumeClick()) {
