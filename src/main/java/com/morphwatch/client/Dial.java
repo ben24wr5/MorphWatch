@@ -64,10 +64,6 @@ public final class Dial {
         ClientState.dialChangedAt = now;
         click(1.4F);
         sendDial(selected(player));
-        if (list.isEmpty()) {
-            player.displayClientMessage(Component.literal("No mobs on your dial yet: look at a mob and press G to scan it")
-                    .withStyle(ChatFormatting.YELLOW), true);
-        }
     }
 
     public static void close(Minecraft mc, boolean tellServer) {
