@@ -1,5 +1,7 @@
 package com.morphwatch.client;
 
+import com.morphwatch.MorphForm;
+
 /** Little bits of client-only state: the flash, the R charge, the dial and the slam shake. */
 public final class ClientState {
     public static final int FLASH_TICKS = 12;
@@ -10,8 +12,9 @@ public final class ClientState {
     public static boolean charging = false;
 
     public static boolean dialOpen = false;
-    public static int dialIndex = 0;
-    public static int dialPrevIndex = 0;
+    /** The mob the dial shows, and the one it showed before the last turn (null = start of the list). */
+    public static MorphForm dialForm = null;
+    public static MorphForm dialPrevForm = null;
     public static long dialOpenedAt = 0;
     public static long dialChangedAt = 0;
     /** When the dial was last closed (it takes a moment to fold away). */
@@ -34,7 +37,8 @@ public final class ClientState {
         charging = false;
         dialOpen = false;
         dialClosedAt = -100000;
-        dialIndex = 0;
+        dialForm = null;
+        dialPrevForm = null;
         shakeTicks = 0;
     }
 }

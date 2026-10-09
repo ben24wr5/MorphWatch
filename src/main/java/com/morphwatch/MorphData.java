@@ -48,6 +48,7 @@ public final class MorphData {
     }          // game time when Camouflage / Shadow Cloak ends
     public static final String ESCAPE = "escape";        // game time when auto-escape is ready
     public static final String SCANS = "scans";          // form id -> list of scanned mob UUIDs
+    public static final String ORDER = "order";          // form ids, the most recently scanned first
     public static final String POWERS_USED = "powers";   // forms whose R power you've used
 
     public static final int GOLDEN_SCANS = 10;
@@ -108,6 +109,34 @@ public final class MorphData {
         int n = 0;
         for (MorphForm f : MorphForm.mobs()) if (isUnlocked(player, f)) n++;
         return n;
+    }
+
+    /** Puts this mob at the front of the dial (the mob you scanned last comes first). */
+    public static void markRecent(Player player, MorphForm form) {
+        CompoundTag root = root(player);
+        ListTag old = root.getList(ORDER, Tag.TAG_STRING);
+        ListTag list = new ListTag();
+        list.add(StringTag.valueOf(form.id()));
+        for (int i = 0; i < old.size(); i++) {
+            if (!old.getString(i).equals(form.id())) list.add(old.get(i));
+        }
+        root.put(ORDER, list);
+    }
+
+    /**
+     * The order of the dial: the mobs you've scanned (the one you scanned last first), then the
+     * locked ones.
+     */
+    public static java.util.List<MorphForm> dialOrder(Player player) {
+        java.util.List<MorphForm> out = new java.util.ArrayList<>();
+        ListTag order = root(player).getList(ORDER, Tag.TAG_STRING);
+        for (int i = 0; i < order.size(); i++) {
+            MorphForm f = MorphForm.byId(order.getString(i));
+            if (f != MorphForm.NONE && isUnlocked(player, f) && !out.contains(f)) out.add(f);
+        }
+        for (MorphForm f : MorphForm.mobs()) if (isUnlocked(player, f) && !out.contains(f)) out.add(f);
+        for (MorphForm f : MorphForm.mobs()) if (!out.contains(f)) out.add(f);
+        return out;
     }
 
     /** Records a scan of this particular mob. Returns false if that exact mob was already counted. */

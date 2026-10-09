@@ -52,6 +52,7 @@ public final class WatchActions {
         boolean wasUnlocked = MorphData.isUnlocked(player, form);
         boolean wasGolden = MorphData.isGolden(player, form);
         boolean counted = MorphData.addScan(player, form, target.getUUID());
+        MorphData.markRecent(player, form);
         int count = MorphData.scanCount(player, form);
 
         if (!wasUnlocked) {

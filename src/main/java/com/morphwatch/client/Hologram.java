@@ -52,8 +52,10 @@ public final class Hologram {
     /** Each click of the dial turns the watch face this much. */
     private static final float DEGREES_PER_CLICK = 30.0F;
     /** How big the dial display is: holograms are scaled to fit inside this (blocks). */
-    private static final float HOLO_SIZE_WORLD = 0.5F;
-    private static final float HOLO_SIZE_HAND = 0.3F;
+    private static final float HOLO_SIZE_WORLD = 0.36F;
+    private static final float HOLO_SIZE_HAND = 0.2F;
+    /** Radius of the watch face (1.5 pixels): the beam of light starts exactly as wide as the face. */
+    private static final float FACE_RADIUS = 1.5F / 16.0F;
 
     private static final int[] GREEN = {120, 255, 90};
     private static final int[] GOLD = {255, 205, 60};
@@ -451,7 +453,7 @@ public final class Hologram {
 
         // Beam of light from the watch face, brighter while switching
         float beamAlpha = (switching ? 0.75F : 0.45F) * open;
-        drawBeam(poseStack, buffers, size * 0.16F, size * 0.32F, size * 0.42F * Math.max(open, 0.2F), color, beamAlpha);
+        drawBeam(poseStack, buffers, FACE_RADIUS, FACE_RADIUS * 1.25F, size * 0.5F * Math.max(open, 0.2F), color, beamAlpha);
 
         if (grow <= 0.01F || showing == MorphForm.NONE) return;
         float flicker = 0.85F + 0.15F * Mth.sin(now * 0.9F);
@@ -466,8 +468,9 @@ public final class Hologram {
         MultiBufferSource holo = type -> new HoloVertexConsumer(
                 buffers.getBuffer(RenderType.entityTranslucentEmissive(TEXTURE)), color[0], color[1], color[2], alpha);
 
-        // Fit inside the dial: never taller or wider than `size`
-        float fit = Math.min(size / Math.max(0.2F, mob.getBbHeight()), size / Math.max(0.2F, mob.getBbWidth() * 1.2F));
+        // Small figure standing on the face (like the Omnitrix): never taller than `size`, and
+        // long or wide mobs (horses, spiders, dragons...) are kept slim too
+        float fit = Math.min(size / Math.max(0.2F, mob.getBbHeight()), size * 0.8F / Math.max(0.2F, mob.getBbWidth() * 1.4F));
         float scale = fit * grow;
         poseStack.pushPose();
         poseStack.translate(0.0F, size * 0.04F, 0.0F);

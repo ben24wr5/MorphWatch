@@ -16,24 +16,26 @@ import java.util.List;
 /**
  * The watch dial. X pops it up (and puts it away), the scroll wheel turns it
  * (up = right / next, down = left / previous), C slams the watch and transforms you.
- * Every mob is on the dial: scanned ones show their hologram, locked ones show a "?".
+ * Every mob is on the dial: scanned ones show their hologram (the one you scanned last comes
+ * first), locked ones show a "?".
  */
 public final class Dial {
     private Dial() {}
 
+    /** Your scanned mobs first (the one you scanned last at the front), then the locked ones. */
     public static List<MorphForm> choices() {
-        return MorphForm.mobs();
+        Player player = Minecraft.getInstance().player;
+        return player == null ? MorphForm.mobs() : MorphData.dialOrder(player);
     }
 
     public static MorphForm selected() {
-        List<MorphForm> list = choices();
-        return list.get(Math.floorMod(ClientState.dialIndex, list.size()));
+        if (ClientState.dialForm == null) ClientState.dialForm = choices().get(0);
+        return ClientState.dialForm;
     }
 
     /** The mob the dial showed before the last turn (for the shrink/grow switch animation). */
     public static MorphForm previous() {
-        List<MorphForm> list = choices();
-        return list.get(Math.floorMod(ClientState.dialPrevIndex, list.size()));
+        return ClientState.dialPrevForm == null ? selected() : ClientState.dialPrevForm;
     }
 
     public static void toggle(Minecraft mc) {
@@ -52,10 +54,9 @@ public final class Dial {
                     .withStyle(ChatFormatting.RED), true);
             return;
         }
-        // Start on your current mob, otherwise where you left the dial last time
-        int current = choices().indexOf(MorphData.getForm(player));
-        if (current >= 0) ClientState.dialIndex = current;
-        ClientState.dialPrevIndex = ClientState.dialIndex;
+        // Always start on the mob you scanned last
+        ClientState.dialForm = choices().get(0);
+        ClientState.dialPrevForm = ClientState.dialForm;
         ClientState.dialOpen = true;
         long now = player.level().getGameTime();
         ClientState.dialOpenedAt = now;
@@ -68,10 +69,9 @@ public final class Dial {
 
     /** You just scanned this mob: the dial moves to it so C transforms you into it. */
     public static void pointAt(MorphForm form) {
-        int i = choices().indexOf(form);
-        if (i < 0 || i == Math.floorMod(ClientState.dialIndex, choices().size())) return;
-        ClientState.dialPrevIndex = ClientState.dialIndex;
-        ClientState.dialIndex = i;
+        if (form == null || form == selected()) return;
+        ClientState.dialPrevForm = selected();
+        ClientState.dialForm = form;
         Minecraft mc = Minecraft.getInstance();
         if (mc.player != null) ClientState.dialChangedAt = mc.player.level().getGameTime();
         if (ClientState.dialOpen) sendDial();
@@ -91,8 +91,10 @@ public final class Dial {
     public static void turn(Minecraft mc, int steps) {
         Player player = mc.player;
         if (player == null || steps == 0) return;
-        ClientState.dialPrevIndex = ClientState.dialIndex;
-        ClientState.dialIndex = Math.floorMod(ClientState.dialIndex + steps, choices().size());
+        List<MorphForm> list = choices();
+        int i = Math.max(0, list.indexOf(selected()));
+        ClientState.dialPrevForm = selected();
+        ClientState.dialForm = list.get(Math.floorMod(i + steps, list.size()));
         ClientState.dialTurnPrevSteps = ClientState.dialTurnSteps;
         ClientState.dialTurnSteps += steps;
         ClientState.dialChangedAt = player.level().getGameTime();
