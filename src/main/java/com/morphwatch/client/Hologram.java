@@ -32,6 +32,7 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 import java.util.EnumMap;
+import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -108,7 +109,7 @@ public final class Hologram {
         modelLevel = null;
     }
 
-    private static LivingEntity model(MorphForm form, Level level) {
+    static LivingEntity model(MorphForm form, Level level) {
         if (modelLevel != level) {
             MODELS.clear();
             modelLevel = level;
@@ -311,15 +312,19 @@ public final class Hologram {
             }
             LAST_WORLD_POINT.put(player.getUUID(), face);
 
-            // Holograms turn to face whoever is looking
-            Vec3 toCam = cam.subtract(face);
-            float faceYaw = (float) Math.toDegrees(Math.atan2(-toCam.x, toCam.z));
+            // A raised arm draws its ring on the watch itself (WatchLayer)
+            if (raisesArm(player)) continue;
 
+            // No arm to hold up (you're a mob): the ring floats beside you, facing whoever is looking
             Vec3 base = face.subtract(cam);
+            Vector3f toViewer = new Vector3f((float) -base.x, (float) -base.y, (float) -base.z).normalize();
+            Vector3f right = new Vector3f(0, 1, 0).cross(toViewer).normalize();
+            Vector3f up = new Vector3f(toViewer).cross(right).normalize();
             poseStack.pushPose();
             poseStack.translate(base.x, base.y, base.z);
-            drawDisplay(mc, poseStack, buffers, player, form, HOLO_SIZE_WORLD, faceYaw, partialTick,
-                    camera.rotation(), false);
+            poseStack.mulPoseMatrix(new Matrix4f(new Matrix3f(right, up, toViewer)));
+            poseStack.scale(1.0F / 16.0F, 1.0F / 16.0F, 1.0F / 16.0F);
+            drawRing(poseStack, buffers, player, form, partialTick);
             poseStack.popPose();
             drewAny = true;
         }
@@ -388,14 +393,53 @@ public final class Hologram {
         WatchModel.renderArm(poseStack, buffers, light, player, rightArm, spare.rightSleeve, PlayerModelPart.RIGHT_SLEEVE);
         poseStack.popPose();
 
-        // The display standing on the watch face
+        // The ring display around the watch face
+        poseStack.pushPose();
+        poseStack.translate(leftOrigin.x(), leftOrigin.y(), leftOrigin.z());
+        poseStack.mulPose(leftRot);
+        drawRingOnArm(poseStack, buffers, player, pop, partialTick);
+        poseStack.popPose();
+    }
+
+    /**
+     * The Omnitrix-style ring lying flat around the raised watch face. Call with the pose on the
+     * left arm (arm space, as the watch is drawn).
+     */
+    static void drawRingOnArm(PoseStack poseStack, MultiBufferSource buffers, Player player, float pop, float partialTick) {
         MorphForm form = shownForm(player);
         if (form == null) return;
+        WatchModel.Parts parts = WatchModel.parts(player);
+        float lift = WatchModel.POP_DISTANCE * Mth.clamp(pop, 0.0F, 1.0F);
         poseStack.pushPose();
-        poseStack.translate(dial.x(), dial.y(), dial.z());
-        float sway = 12.0F * Mth.sin(now * 0.05F);
-        drawDisplay(mc, poseStack, buffers, player, form, HOLO_SIZE_HAND, sway, partialTick, new Quaternionf(), true);
+        poseStack.translate(parts.centreX() / 16.0F, WatchModel.WRIST_Y / 16.0F, (WatchModel.FACE_FRONT_Z - lift - 0.1F) / 16.0F);
+        // Ring space: x right, y up the arm (top of the ring), viewer on the +z side (out of the watch face)
+        poseStack.mulPose(Axis.YP.rotationDegrees(180.0F));
+        poseStack.scale(1.0F / 16.0F, 1.0F / 16.0F, 1.0F / 16.0F);
+        drawRing(poseStack, buffers, player, form, partialTick);
         poseStack.popPose();
+    }
+
+    private static void drawRing(PoseStack poseStack, MultiBufferSource buffers, Player player, MorphForm form,
+                                 float partialTick) {
+        float now = player.level().getGameTime() + partialTick;
+        List<MorphForm> order = player == Minecraft.getInstance().player ? Dial.choices() : MorphData.dialOrder(player);
+        DialRing.draw(poseStack, buffers, player, form, order, raiseProgress(player, partialTick),
+                ringSlide(player, partialTick), now);
+    }
+
+    /** How far (in slots) the ring's icons still have to slide after a turn of the dial. */
+    private static float ringSlide(Player player, float partialTick) {
+        float now = player.level().getGameTime() + partialTick;
+        float t = (now - changedAt(player)) / SWITCH_TICKS;
+        if (t < 0.0F || t >= 1.0F) return 0.0F;
+        int dir;
+        if (player == Minecraft.getInstance().player) {
+            dir = Integer.signum(ClientState.dialTurnSteps - ClientState.dialTurnPrevSteps);
+        } else {
+            Remote remote = REMOTE.get(player.getUUID());
+            dir = remote == null ? 0 : Integer.signum(remote.turnSteps() - remote.prevTurnSteps());
+        }
+        return dir * (1.0F - TransformAnims.ease(t));
     }
 
     /**

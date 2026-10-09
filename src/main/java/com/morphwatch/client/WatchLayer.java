@@ -59,6 +59,7 @@ public class WatchLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Ab
         WatchModel.renderWatch(poseStack, buffers, packedLight, player, true, ageInTicks, pop,
                 Hologram.dialTurnDegrees(player, partialTick));
         Hologram.captureDialPoint(player, WatchModel.dialPoint(poseStack, player, pop));
+        Hologram.drawRingOnArm(poseStack, buffers, player, pop, partialTick);
         poseStack.popPose();
     }
 }
