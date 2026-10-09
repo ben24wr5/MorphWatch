@@ -1,6 +1,8 @@
 package com.morphwatch.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.morphwatch.MorphData;
 import com.morphwatch.MorphWatchMod;
 import net.minecraft.client.model.PlayerModel;
@@ -37,6 +39,12 @@ public final class WatchModel {
 
     /** Wrist height (pixels down the arm) where the dial sits. */
     public static final float WRIST_Y = 8.0F;
+    /** Front of the gold case on the strap (pixels, -z is out from the front of the wrist). */
+    static final float CASE_FRONT_Z = -3.3F;
+    /** Front of the dial when it's closed (it sticks out of the case a little). */
+    static final float FACE_FRONT_Z = -3.6F;
+    /** How far the dial pops up out of its case when the dial opens (pixels). */
+    static final float POP_DISTANCE = 1.5F;
 
     private static final Parts WIDE = new Parts(false);
     private static final Parts SLIM = new Parts(true);
@@ -51,6 +59,8 @@ public final class WatchModel {
         final ModelPart band;
         final ModelPart sideFace;   // dial on the outside of the arm (arm hanging down)
         final ModelPart topFace;    // dial on the front of the wrist (arm raised: it faces your eyes)
+        final ModelPart housing;    // gold case on the strap that the top dial sits in
+        final ModelPart riser;      // gold stem that lifts the dial out of its case
 
         Parts(boolean slim) {
             this.armWidth = slim ? 3.0F : 4.0F;
@@ -58,6 +68,8 @@ public final class WatchModel {
             this.band = root.getChild("band");
             this.sideFace = root.getChild("face");
             this.topFace = root.getChild("top_face");
+            this.housing = root.getChild("housing");
+            this.riser = root.getChild("riser");
         }
 
         /** Centre of the arm across its width, in pixels. */
@@ -77,9 +89,19 @@ public final class WatchModel {
                         .texOffs(0, 8)
                         .addBox(-1.0F + armWidth, 6.5F, -1.5F, 1.0F, 3.0F, 3.0F),
                 PartPose.ZERO);
+        // Front of the wrist: a gold case sitting right on the strap, the dial sits in it.
+        // The strap's front surface is at z = -2.3 (it's puffed out by 0.3).
+        root.addOrReplaceChild("housing", CubeListBuilder.create()
+                        .texOffs(0, 16)
+                        .addBox(-1.0F, 6.0F, CASE_FRONT_Z, armWidth, 4.0F, -CASE_FRONT_Z - 2.3F),
+                PartPose.ZERO);
+        root.addOrReplaceChild("riser", CubeListBuilder.create()
+                        .texOffs(12, 16)
+                        .addBox(-1.0F + armWidth / 2.0F - 1.0F, 7.0F, -1.0F, 2.0F, 2.0F, 1.0F),
+                PartPose.ZERO);
         root.addOrReplaceChild("top_face", CubeListBuilder.create()
                         .texOffs(16, 8)
-                        .addBox(-1.0F + (armWidth - 3.0F) / 2.0F, 6.5F, -3.0F, 3.0F, 3.0F, 1.0F),
+                        .addBox(-1.0F + (armWidth - 3.0F) / 2.0F, 6.5F, FACE_FRONT_Z, 3.0F, 3.0F, 1.0F),
                 PartPose.ZERO);
         return LayerDefinition.create(mesh, 32, 32);
     }
@@ -119,17 +141,38 @@ public final class WatchModel {
 
     /**
      * Draws the watch in arm space (call after moving the pose stack onto the arm).
-     * raised = the dial faces up from the front of the wrist instead of out to the side.
+     * raised = the dial is on the front of the wrist in its gold case (arm held up).
+     * pop = 0..1, how far the dial has popped up out of its case on a stem.
+     * dialTurn = how far the dial has been turned, in degrees (it turns when you scroll).
      */
     static void renderWatch(PoseStack poseStack, MultiBufferSource buffers, int light, Player player,
-                            boolean raised, float ageInTicks, float popOut) {
+                            boolean raised, float ageInTicks, float pop, float dialTurn) {
         Parts p = parts(player);
-        ModelPart face = raised ? p.topFace : p.sideFace;
-        p.band.render(poseStack, buffers.getBuffer(RenderType.entityCutoutNoCull(TEXTURE)), light, OverlayTexture.NO_OVERLAY);
-        // With the dial up, the face pops out of the watch a little (popOut is in pixels)
+        VertexConsumer metal = buffers.getBuffer(RenderType.entityCutoutNoCull(TEXTURE));
+        p.band.render(poseStack, metal, light, OverlayTexture.NO_OVERLAY);
+        ModelPart face = p.sideFace;
+
         poseStack.pushPose();
-        if (raised && popOut > 0) poseStack.translate(0.0F, 0.0F, -popOut / 16.0F);
-        face.render(poseStack, buffers.getBuffer(RenderType.entityCutoutNoCull(TEXTURE)), light, OverlayTexture.NO_OVERLAY);
+        if (raised) {
+            face = p.topFace;
+            p.housing.render(poseStack, metal, light, OverlayTexture.NO_OVERLAY);
+            float lift = POP_DISTANCE * Mth.clamp(pop, 0.0F, 1.0F);
+            if (lift > 0.01F) {
+                // The stem joining the case to the popped-up dial
+                poseStack.pushPose();
+                poseStack.translate(0.0F, 0.0F, CASE_FRONT_Z / 16.0F);
+                poseStack.scale(1.0F, 1.0F, lift + 0.4F);
+                p.riser.render(poseStack, metal, light, OverlayTexture.NO_OVERLAY);
+                poseStack.popPose();
+            }
+            poseStack.translate(0.0F, 0.0F, -lift / 16.0F);
+            // Turn the dial about its own centre
+            float cx = p.centreX() / 16.0F, cy = WRIST_Y / 16.0F, cz = (FACE_FRONT_Z + 0.5F) / 16.0F;
+            poseStack.translate(cx, cy, cz);
+            poseStack.mulPose(Axis.ZP.rotationDegrees(dialTurn));
+            poseStack.translate(-cx, -cy, -cz);
+        }
+        face.render(poseStack, metal, light, OverlayTexture.NO_OVERLAY);
 
         // Glow ring: green when the R power is ready, red while it recharges. Gently pulses.
         long now = player.level().getGameTime();
@@ -144,9 +187,10 @@ public final class WatchModel {
     }
 
     /** The point just above the raised dial, in the current pose's space. The hologram rises from here. */
-    static Vector3f dialPoint(PoseStack poseStack, Player player, float popOut) {
+    static Vector3f dialPoint(PoseStack poseStack, Player player, float pop) {
         Parts p = parts(player);
-        Vector3f v = new Vector3f(p.centreX() / 16.0F, WRIST_Y / 16.0F, (-3.1F - popOut) / 16.0F);
+        float lift = POP_DISTANCE * Mth.clamp(pop, 0.0F, 1.0F);
+        Vector3f v = new Vector3f(p.centreX() / 16.0F, WRIST_Y / 16.0F, (FACE_FRONT_Z - lift - 0.05F) / 16.0F);
         return poseStack.last().pose().transformPosition(v);
     }
 }

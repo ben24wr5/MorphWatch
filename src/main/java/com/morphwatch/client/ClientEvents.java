@@ -155,7 +155,7 @@ public final class ClientEvents {
         @SubscribeEvent
         public static void onRenderHand(RenderHandEvent event) {
             Minecraft mc = Minecraft.getInstance();
-            if (mc.player == null || !ClientState.dialOpen || !Hologram.raisesArm(mc.player)) return;
+            if (mc.player == null || !Hologram.raisesArm(mc.player)) return;
             // Both hands are busy with the watch: hide the normal hands and draw ours once
             event.setCanceled(true);
             if (event.getHand() == InteractionHand.MAIN_HAND) {

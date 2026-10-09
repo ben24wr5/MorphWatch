@@ -34,7 +34,7 @@ public class WatchLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Ab
             // Arm hanging normally: watch with the dial on the outside of the wrist
             poseStack.pushPose();
             parent.leftArm.translateAndRotate(poseStack);
-            WatchModel.renderWatch(poseStack, buffers, packedLight, player, false, ageInTicks, 0.0F);
+            WatchModel.renderWatch(poseStack, buffers, packedLight, player, false, ageInTicks, 0.0F, 0.0F);
             poseStack.popPose();
             return;
         }
@@ -55,8 +55,9 @@ public class WatchLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Ab
 
         poseStack.pushPose();
         arm.translateAndRotate(poseStack);
-        float pop = rise;  // the dial face pops out by 1 pixel as it opens
-        WatchModel.renderWatch(poseStack, buffers, packedLight, player, true, ageInTicks, pop);
+        float pop = rise;  // the dial pops up out of its case as it opens, and sinks back as it closes
+        WatchModel.renderWatch(poseStack, buffers, packedLight, player, true, ageInTicks, pop,
+                Hologram.dialTurnDegrees(player, partialTick));
         Hologram.captureDialPoint(player, WatchModel.dialPoint(poseStack, player, pop));
         poseStack.popPose();
     }

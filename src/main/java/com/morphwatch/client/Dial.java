@@ -59,6 +59,8 @@ public final class Dial {
         ClientState.dialOpen = true;
         long now = player.level().getGameTime();
         ClientState.dialOpenedAt = now;
+        ClientState.dialClosedAt = -1000;
+        ClientState.dialTurnPrevSteps = ClientState.dialTurnSteps;
         ClientState.dialChangedAt = now - 100; // no switch animation on open
         click(1.4F);
         sendDial();
@@ -67,6 +69,7 @@ public final class Dial {
     public static void close(Minecraft mc, boolean tellServer) {
         if (!ClientState.dialOpen) return;
         ClientState.dialOpen = false;
+        if (mc.player != null) ClientState.dialClosedAt = mc.player.level().getGameTime();
         if (tellServer && mc.player != null) {
             ModNetwork.CHANNEL.sendToServer(new WatchActionPacket(WatchActionPacket.DIAL, -1));
         }
@@ -79,6 +82,8 @@ public final class Dial {
         if (player == null || steps == 0) return;
         ClientState.dialPrevIndex = ClientState.dialIndex;
         ClientState.dialIndex = Math.floorMod(ClientState.dialIndex + steps, choices().size());
+        ClientState.dialTurnPrevSteps = ClientState.dialTurnSteps;
+        ClientState.dialTurnSteps += steps;
         ClientState.dialChangedAt = player.level().getGameTime();
         click(steps > 0 ? 1.8F : 1.6F);
         sendDial();

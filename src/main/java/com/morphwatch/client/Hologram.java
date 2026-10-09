@@ -48,6 +48,9 @@ public final class Hologram {
             new ResourceLocation(MorphWatchMod.MODID, "textures/misc/hologram.png");
     private static final int RISE_TICKS = 6;
     private static final int SWITCH_TICKS = 6;
+    private static final int CLOSE_TICKS = 7;
+    /** Each click of the dial turns the watch face this much. */
+    private static final float DEGREES_PER_CLICK = 30.0F;
     /** How big the dial display is: holograms are scaled to fit inside this (blocks). */
     private static final float HOLO_SIZE_WORLD = 0.5F;
     private static final float HOLO_SIZE_HAND = 0.3F;
@@ -55,8 +58,9 @@ public final class Hologram {
     private static final int[] GREEN = {120, 255, 90};
     private static final int[] GOLD = {255, 205, 60};
 
-    /** Other players' open dials. */
-    private record Remote(int ordinal, int prevOrdinal, long openedAt, long changedAt) {}
+    /** Other players' dials (closedAt < 0 while open). */
+    private record Remote(int ordinal, int prevOrdinal, long openedAt, long changedAt, long closedAt,
+                          int turnSteps, int prevTurnSteps) {}
 
     /** Where each player's watch face was drawn this frame (camera space). */
     private record Captured(Vector3f viewPoint, int frame) {}
@@ -73,15 +77,24 @@ public final class Hologram {
 
     public static void setRemote(Player player, int ordinal) {
         long now = player.level().getGameTime();
+        Remote old = REMOTE.get(player.getUUID());
         if (ordinal < 0) {
-            REMOTE.remove(player.getUUID());
+            // Closing: keep it a moment so it can fold away
+            if (old != null && old.closedAt() < 0) {
+                REMOTE.put(player.getUUID(), new Remote(old.ordinal(), old.ordinal(), old.openedAt(), now - 100,
+                        now, old.turnSteps(), old.turnSteps()));
+            }
             return;
         }
-        Remote old = REMOTE.get(player.getUUID());
-        if (old == null) {
-            REMOTE.put(player.getUUID(), new Remote(ordinal, ordinal, now, now - 100));
+        if (old == null || old.closedAt() >= 0) {
+            int steps = old == null ? 0 : old.turnSteps();
+            REMOTE.put(player.getUUID(), new Remote(ordinal, ordinal, now, now - 100, -1, steps, steps));
         } else if (old.ordinal() != ordinal) {
-            REMOTE.put(player.getUUID(), new Remote(ordinal, old.ordinal(), old.openedAt(), now));
+            int n = MorphForm.mobs().size();
+            int diff = Math.floorMod(ordinal - old.ordinal(), n);
+            int dir = diff <= n / 2 ? 1 : -1;
+            REMOTE.put(player.getUUID(), new Remote(ordinal, old.ordinal(), old.openedAt(), now, -1,
+                    old.turnSteps() + dir, old.turnSteps()));
         }
     }
 
@@ -107,13 +120,56 @@ public final class Hologram {
 
     // ------------------------------------------------------------ dial state
 
-    /** Which mob this player's dial shows, or null if their dial is down. */
-    static MorphForm shownForm(Player player) {
+    /** Is this player's dial up, or still folding away after being closed? */
+    static boolean dialVisible(Player player) {
+        long now = player.level().getGameTime();
         if (player == Minecraft.getInstance().player) {
-            return ClientState.dialOpen ? Dial.selected() : null;
+            long since = now - ClientState.dialClosedAt;
+            return ClientState.dialOpen || (since >= 0 && since < CLOSE_TICKS);
         }
         Remote remote = REMOTE.get(player.getUUID());
+        return remote != null && (remote.closedAt() < 0 || now - remote.closedAt() < CLOSE_TICKS);
+    }
+
+    private static long closedAt(Player player) {
+        if (player == Minecraft.getInstance().player) return ClientState.dialOpen ? -1 : ClientState.dialClosedAt;
+        Remote remote = REMOTE.get(player.getUUID());
+        return remote == null ? -1 : remote.closedAt();
+    }
+
+    /** Which mob this player's dial shows (while it's up or folding away), or null. */
+    static MorphForm shownForm(Player player) {
+        if (!dialVisible(player)) return null;
+        if (player == Minecraft.getInstance().player) return Dial.selected();
+        Remote remote = REMOTE.get(player.getUUID());
         return remote == null ? null : MorphForm.byOrdinal(remote.ordinal());
+    }
+
+    /** How far the dial face has been turned, in degrees, smoothly following each scroll click. */
+    static float dialTurnDegrees(Player player, float partialTick) {
+        int steps, prev;
+        if (player == Minecraft.getInstance().player) {
+            steps = ClientState.dialTurnSteps;
+            prev = ClientState.dialTurnPrevSteps;
+        } else {
+            Remote remote = REMOTE.get(player.getUUID());
+            if (remote == null) return 0.0F;
+            steps = remote.turnSteps();
+            prev = remote.prevTurnSteps();
+        }
+        float now = player.level().getGameTime() + partialTick;
+        float t = TransformAnims.ease((now - changedAt(player)) / SWITCH_TICKS);
+        return Mth.lerp(t, prev, steps) * -DEGREES_PER_CLICK;
+    }
+
+    /** -1, 0 or 1: which way the dial is turning right now (for the hand twist). */
+    static float turnTwist(Player player, float partialTick) {
+        float now = player.level().getGameTime() + partialTick;
+        float t = (now - changedAt(player)) / SWITCH_TICKS;
+        if (t < 0.0F || t > 1.0F) return 0.0F;
+        int dir = player == Minecraft.getInstance().player
+                ? Integer.signum(ClientState.dialTurnSteps - ClientState.dialTurnPrevSteps) : 1;
+        return dir * Mth.sin((float) Math.PI * t);
     }
 
     private static MorphForm previousForm(Player player) {
@@ -140,10 +196,19 @@ public final class Hologram {
                 && MorphData.getForm(player) == MorphForm.NONE && TransformAnims.get(player) == null;
     }
 
-    /** 0 -> 1 as the arm lifts up after the dial opens. */
+    /**
+     * 0 -> 1 as the arm lifts and the dial pops open, and back 1 -> 0 as it folds away
+     * after closing (the hologram shrinks into the watch, the dial sinks into its case,
+     * the arm comes down).
+     */
     public static float raiseProgress(Player player, float partialTick) {
         float now = player.level().getGameTime() + partialTick;
-        return TransformAnims.ease((now - openedAt(player)) / RISE_TICKS);
+        float open = TransformAnims.ease((now - openedAt(player)) / RISE_TICKS);
+        long closed = closedAt(player);
+        if (closed >= 0) {
+            open *= 1.0F - TransformAnims.ease((now - closed) / CLOSE_TICKS);
+        }
+        return open;
     }
 
     // --------------------------------------------- where the watch face is
@@ -189,6 +254,8 @@ public final class Hologram {
     /** A few sparks drifting up from the watch face. */
     public static void tick(Minecraft mc) {
         if (mc.level == null || mc.player == null) return;
+        long gameTime = mc.level.getGameTime();
+        REMOTE.values().removeIf(r -> r.closedAt() >= 0 && gameTime - r.closedAt() > CLOSE_TICKS + 2);
         if (mc.level.getGameTime() % 3 != 0) return;
         for (Player player : mc.level.players()) {
             if (shownForm(player) == null) continue;
@@ -277,7 +344,7 @@ public final class Hologram {
         poseStack.mulPose(leftRot);
         WatchModel.renderArm(poseStack, buffers, light, player, leftArm, spare.leftSleeve, PlayerModelPart.LEFT_SLEEVE);
         float pop = rise;
-        WatchModel.renderWatch(poseStack, buffers, light, player, true, now, pop);
+        WatchModel.renderWatch(poseStack, buffers, light, player, true, now, pop, dialTurnDegrees(player, partialTick));
         Vector3f dial = WatchModel.dialPoint(poseStack, player, pop);
         poseStack.popPose();
 
@@ -292,6 +359,11 @@ public final class Hologram {
         poseStack.pushPose();
         poseStack.translate(rightOrigin.x(), rightOrigin.y(), rightOrigin.z());
         poseStack.mulPose(rightRot);
+        // Twist the hand as it turns the dial
+        float twist = turnTwist(player, partialTick) * 35.0F;
+        poseStack.translate(rightCentreX / 16.0F, 0.0F, 0.0F);
+        poseStack.mulPose(Axis.YP.rotationDegrees(twist));
+        poseStack.translate(-rightCentreX / 16.0F, 0.0F, 0.0F);
         WatchModel.renderArm(poseStack, buffers, light, player, rightArm, spare.rightSleeve, PlayerModelPart.RIGHT_SLEEVE);
         poseStack.popPose();
 
@@ -338,7 +410,7 @@ public final class Hologram {
                                     MorphForm form, float size, float faceYaw, float partialTick,
                                     Quaternionf textRotation, boolean cameraSpace) {
         float now = player.level().getGameTime() + partialTick;
-        float open = TransformAnims.ease((now - openedAt(player)) / RISE_TICKS);
+        float open = raiseProgress(player, partialTick);
         float sw = (now - changedAt(player)) / SWITCH_TICKS;
 
         // Turning the dial: the old hologram shrinks into the watch, then the new one grows out

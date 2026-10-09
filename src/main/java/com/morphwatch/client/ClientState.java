@@ -14,6 +14,11 @@ public final class ClientState {
     public static int dialPrevIndex = 0;
     public static long dialOpenedAt = 0;
     public static long dialChangedAt = 0;
+    /** When the dial was last closed (it takes a moment to fold away). */
+    public static long dialClosedAt = -1000;
+    /** How many clicks the dial has been turned in total (each click turns the dial face 30 degrees). */
+    public static int dialTurnSteps = 0;
+    public static int dialTurnPrevSteps = 0;
 
     public static int shakeTicks = 0;
 
@@ -28,6 +33,7 @@ public final class ClientState {
         chargeTicks = 0;
         charging = false;
         dialOpen = false;
+        dialClosedAt = -100000;
         dialIndex = 0;
         shakeTicks = 0;
     }
