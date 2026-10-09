@@ -38,7 +38,7 @@ import java.util.UUID;
 
 /**
  * The dial display on the watch: while the dial is up you hold your arm up, the watch face
- * pops out, a beam of light shines up from it and a hologram of the selected mob stands on
+ * pops out and a small hologram of the selected mob stands on
  * top of the watch. Scanned mobs show their hologram, locked ones show a "?". Turning the
  * dial shrinks the old hologram into the watch and grows the new one out of it.
  * Everyone nearby sees it. Holograms are green, golden forms are gold.
@@ -451,9 +451,7 @@ public final class Hologram {
         boolean golden = showing != MorphForm.NONE && MorphData.isGolden(player, showing);
         int[] color = golden ? GOLD : GREEN;
 
-        // Beam of light from the watch face, brighter while switching
-        float beamAlpha = (switching ? 0.75F : 0.45F) * open;
-        drawBeam(poseStack, buffers, FACE_RADIUS, FACE_RADIUS * 1.25F, size * 0.5F * Math.max(open, 0.2F), color, beamAlpha);
+        // No glowing cone: just the hologram standing on the watch face
 
         if (grow <= 0.01F || showing == MorphForm.NONE) return;
         float flicker = 0.85F + 0.15F * Mth.sin(now * 0.9F);
