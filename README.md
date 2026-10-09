@@ -9,7 +9,7 @@ A gold watch with a red strap that you wear on your wrist. Scan any of the 77 mo
 | Key | What happens |
 |---|---|
 | **V** while looking at a mob | Scan it with a beam. This unlocks the mob and puts it on your dial |
-| **Right-click** (dial up) | Slam the watch and transform into the mob on the dial. The mob you scanned last is always first |
+| **Left-click** (dial up) | Slam the watch and transform into the mob on the dial. The mob you scanned last is always first |
 | **X** | Raise your arm and open the dial (press X again to close it) |
 | **Scroll wheel** (dial up) | Up = turn right (next mob), down = turn left (previous mob). Locked mobs show a **?** |
 | **,** (comma) or **Sneak + V** | Back to human |
@@ -25,7 +25,7 @@ The panel in the top-left corner shows your mob, your watch, how many mobs you'v
 
 ## The dial and transformation
 
-Press **X** and a see-through green ring pops up around your watch face, like the Omnitrix, with glowing mob icons round the top. The mob at the top (in the brightest segment) is the one you'll turn into; locked mobs show a **?** and golden forms glow gold. Friends nearby can see it too. Scroll to slide the icons round (it clicks), then **right-click** to slam the watch. The screen shakes, gold light spirals up your body, you spin and shrink or grow into the mob, there's a flash and a jingle, and the camera pulls out so you can watch it happen.
+Press **X** and a see-through green ring pops up around your watch face, like the Omnitrix, with glowing mob icons round the top. The mob at the top (in the brightest segment) is the one you'll turn into; locked mobs show a **?** and golden forms glow gold. Friends nearby can see it too. Scroll to slide the icons round (it clicks), then **left-click** to slam the watch. The screen shakes, gold light spirals up your body, you spin and shrink or grow into the mob, there's a flash and a jingle, and the camera pulls out so you can watch it happen.
 
 | Watch | Transform time | Wait before the next transform |
 |---|---|---|

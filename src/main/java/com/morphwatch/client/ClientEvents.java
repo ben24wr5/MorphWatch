@@ -229,11 +229,11 @@ public final class ClientEvents {
             }
         }
 
-        /** Right-click while the dial is up: slam the watch and transform into the mob on the dial. */
+        /** Left-click while the dial is up: slam the watch and transform into the mob on the dial. */
         @SubscribeEvent
         public static void onUseKey(InputEvent.InteractionKeyMappingTriggered event) {
             Minecraft mc = Minecraft.getInstance();
-            if (!event.isUseItem() || !ClientState.dialOpen || mc.screen != null || mc.player == null) return;
+            if (!event.isAttack() || !ClientState.dialOpen || mc.screen != null || mc.player == null) return;
             event.setCanceled(true);
             event.setSwingHand(false);
             Dial.slam(mc);
@@ -282,7 +282,7 @@ public final class ClientEvents {
                 if (inGame) send(WatchActionPacket.POWER_2, crosshairTarget(mc));
             }
 
-            // V: look at a mob and press V to scan it (then X + right-click transforms you). Sneak + V = back to human.
+            // V: look at a mob and press V to scan it (then X + left-click transforms you). Sneak + V = back to human.
             while (SCAN_KEY.consumeClick()) {
                 if (!inGame) continue;
                 if (!MorphData.isWearing(mc.player)) {
@@ -301,7 +301,7 @@ public final class ClientEvents {
                 }
             }
 
-            // X: pop the dial up / put it away (right-click while it's up transforms you)
+            // X: pop the dial up / put it away (left-click while it's up transforms you)
             while (DIAL_KEY.consumeClick()) {
                 if (inGame) {
                     Dial.toggle(mc);

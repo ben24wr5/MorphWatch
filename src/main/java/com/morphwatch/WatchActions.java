@@ -56,7 +56,7 @@ public final class WatchActions {
         int count = MorphData.scanCount(player, form);
 
         if (!wasUnlocked) {
-            tell(player, "New mob unlocked: " + form.displayName().getString() + "! Press X and right-click to transform",
+            tell(player, "New mob unlocked: " + form.displayName().getString() + "! Press X and left-click to transform",
                     ChatFormatting.GREEN);
             MorphAdvancements.award(player, MorphAdvancements.FIRST_SCAN);
             if (MorphData.unlockedCount(player) >= MorphForm.mobs().size()) {
@@ -76,7 +76,7 @@ public final class WatchActions {
             // Already this mob: refresh hearts in case it just turned golden.
             MorphData.applyHealth(player, form);
         } else if (wasUnlocked) {
-            tell(player, form.displayName().getString() + " scanned! Press X and right-click to transform", ChatFormatting.AQUA);
+            tell(player, form.displayName().getString() + " scanned! Press X and left-click to transform", ChatFormatting.AQUA);
         }
         MorphData.sync(player);
     }
