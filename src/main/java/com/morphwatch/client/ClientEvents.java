@@ -16,6 +16,7 @@ import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -26,6 +27,7 @@ import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.client.event.RenderArmEvent;
+import net.minecraftforge.client.event.RenderHandEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.client.event.ViewportEvent;
@@ -70,10 +72,11 @@ public final class ClientEvents {
         /** Add the worn-watch layer to both player models (classic and slim arms). */
         @SubscribeEvent
         public static void onAddLayers(EntityRenderersEvent.AddLayers event) {
+            WatchModel.bakeArms(event.getEntityModels());
             for (String skin : event.getSkins()) {
                 PlayerRenderer renderer = event.getSkin(skin);
                 if (renderer != null) {
-                    renderer.addLayer(new WatchLayer(renderer, "slim".equals(skin)));
+                    renderer.addLayer(new WatchLayer(renderer));
                 }
             }
         }
@@ -108,6 +111,11 @@ public final class ClientEvents {
             PoseStack poseStack = event.getPoseStack();
 
             if (form == MorphForm.NONE) {
+                // Dial up: hide the real left arm, WatchLayer draws it raised up to look at the watch
+                if (Hologram.raisesArm(player)) {
+                    event.getRenderer().getModel().leftArm.visible = false;
+                    event.getRenderer().getModel().leftSleeve.visible = false;
+                }
                 // Normal player model; only touch it while animating
                 if (anim != null) {
                     poseStack.pushPose();
@@ -140,6 +148,18 @@ public final class ClientEvents {
             if (!PUSHED.isEmpty() && PUSHED.pop()) {
                 event.getPoseStack().popPose();
             }
+            event.getRenderer().getModel().leftArm.visible = true;
+        }
+
+        /** First person: with the dial up, your left arm comes up into view showing the watch and hologram. */
+        @SubscribeEvent
+        public static void onRenderHand(RenderHandEvent event) {
+            if (event.getHand() != InteractionHand.OFF_HAND) return;
+            Minecraft mc = Minecraft.getInstance();
+            if (mc.player == null || !ClientState.dialOpen || !Hologram.raisesArm(mc.player)) return;
+            event.setCanceled(true);
+            Hologram.renderFirstPerson(event.getPoseStack(), event.getMultiBufferSource(), event.getPackedLight(),
+                    mc.player, event.getPartialTick());
         }
 
         private static void applyAnim(PoseStack poseStack, TransformAnims.Anim anim, float now) {
@@ -159,7 +179,12 @@ public final class ClientEvents {
         /** The hologram rising out of the watch while a dial is up. */
         @SubscribeEvent
         public static void onRenderLevel(RenderLevelStageEvent event) {
-            if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_PARTICLES) {
+            RenderLevelStageEvent.Stage stage = event.getStage();
+            if (stage == RenderLevelStageEvent.Stage.AFTER_SKY) {
+                Hologram.beginEntities();
+            } else if (stage == RenderLevelStageEvent.Stage.AFTER_ENTITIES) {
+                Hologram.endEntities();
+            } else if (stage == RenderLevelStageEvent.Stage.AFTER_PARTICLES) {
                 Hologram.render(event.getPoseStack(), event.getCamera(), event.getPartialTick());
             }
         }
