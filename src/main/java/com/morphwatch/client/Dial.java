@@ -54,6 +54,8 @@ public final class Dial {
                     .withStyle(ChatFormatting.RED), true);
             return;
         }
+        // No dial while you're a mob
+        if (MorphData.getForm(player) != MorphForm.NONE) return;
         // Always start on the mob you scanned last
         ClientState.dialForm = choices().get(0);
         ClientState.dialPrevForm = ClientState.dialForm;

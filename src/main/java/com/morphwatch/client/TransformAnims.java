@@ -61,8 +61,21 @@ public final class TransformAnims {
     private static final Map<UUID, Anim> ANIMS = new HashMap<>();
     private static boolean cameraPulledOut = false;
     private static long cameraRestoreAt = -1;
+    /** Your own transformation background: when it started, and when it goes away (-1 = still going). */
+    private static long backgroundStart = -1000;
+    private static long backgroundEnd = -1000;
+    private static final int BACKGROUND_FADE_IN = 3;
+    private static final int BACKGROUND_FADE_OUT = 6;
 
     private TransformAnims() {}
+
+    /** 0..1: how strongly the transformation background shows behind you right now. */
+    public static float backgroundAlpha(float now) {
+        float in = Mth.clamp((now - backgroundStart) / BACKGROUND_FADE_IN, 0.0F, 1.0F);
+        if (backgroundEnd < 0) return in;
+        float out = Mth.clamp((backgroundEnd - now) / BACKGROUND_FADE_OUT, 0.0F, 1.0F);
+        return Math.min(in, out);
+    }
 
     public static void start(Player player, MorphForm from, MorphForm to, int ticks) {
         long now = player.level().getGameTime();
@@ -75,6 +88,8 @@ public final class TransformAnims {
                 cameraPulledOut = true;
             }
             cameraRestoreAt = -1;
+            backgroundStart = now;
+            backgroundEnd = -1;
         }
     }
 
@@ -135,7 +150,10 @@ public final class TransformAnims {
             boolean done = elapsed >= anim.duration
                     && (player == null || MorphData.getForm(player) == anim.to || elapsed > anim.duration + 40);
             if (done) {
-                if (player == mc.player) cameraRestoreAt = gameTime + CAMERA_HOLD_TICKS;
+                if (player == mc.player) {
+                    cameraRestoreAt = gameTime + CAMERA_HOLD_TICKS;
+                    backgroundEnd = gameTime + CAMERA_HOLD_TICKS;
+                }
                 it.remove();
                 continue;
             }
@@ -200,5 +218,7 @@ public final class TransformAnims {
         ANIMS.clear();
         cameraPulledOut = false;
         cameraRestoreAt = -1;
+        backgroundStart = -1000;
+        backgroundEnd = -1000;
     }
 }

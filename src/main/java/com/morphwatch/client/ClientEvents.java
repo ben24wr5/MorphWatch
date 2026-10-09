@@ -190,6 +190,9 @@ public final class ClientEvents {
             RenderLevelStageEvent.Stage stage = event.getStage();
             if (stage == RenderLevelStageEvent.Stage.AFTER_SKY) {
                 Hologram.beginEntities();
+            } else if (stage == RenderLevelStageEvent.Stage.AFTER_CUTOUT_BLOCKS) {
+                // Your transformation background goes in before mobs and players are drawn
+                TransformBackground.render(event.getPoseStack(), event.getCamera(), event.getPartialTick());
             } else if (stage == RenderLevelStageEvent.Stage.AFTER_ENTITIES) {
                 Hologram.endEntities();
             } else if (stage == RenderLevelStageEvent.Stage.AFTER_PARTICLES) {
