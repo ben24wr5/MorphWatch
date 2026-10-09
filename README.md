@@ -1,6 +1,6 @@
-# Morph Watch — Forge 1.20.1 (Stage 2)
+# Morph Watch — Forge 1.20.1
 
-A gold watch with a red strap that you wear on your wrist. Scan mobs to unlock them, then turn into them, with their hearts, their attacks and four powers each: two regular powers and two super powers.
+A gold watch with a red strap that you wear on your wrist. Scan any of the 77 mobs in the game to unlock it, then turn into it, with their hearts, their attacks and four powers each: two regular powers and two super powers.
 
 ## Controls
 
@@ -75,6 +75,104 @@ Super powers are bigger than G and H and take longer to recharge: 20 seconds for
 **Mob friends:** up to 6 mobs of your kind follow you and attack whatever you fight.
 **Auto-escape:** if your hearts drop below a quarter, the watch turns you human, cancels the hit and heals you. It then needs 60 seconds to recharge (45 for diamond, 30 for netherite).
 
+## All the other mobs
+
+Every mob in Minecraft 1.20.1 is on the watch: 77 in total. Each one has **G** and **H** powers and **B** and **N** super powers. Husks, Strays, Drowned, Zombie Villagers and Cave Spiders are their own forms.
+
+
+### Animals and friendly mobs
+
+| Mob | Hearts | G | H | B (super) | N (super) |
+|---|---|---|---|---|---|
+| Allay | 10 | Item Magnet | Happy Dance | Music Storm | Vanish |
+| Camel | 16 | Camel Dash | Sand Kick | Stampede | Desert Rest |
+| Cow | 5 | Milk Heal | Moo | Cow Charge | Cow Shield |
+| Donkey | 11 | Back Kick | Pack Mule | Mega Kick | Bray |
+| Mule | 11 | Back Kick | Stubborn | Mega Kick | Snack Bag |
+| Horse | 11 | Gallop | Buck | Horse Charge | Mega Leap |
+| Skeleton Horse | 7 | Gallop | Bone Kick | Lightning Strike | Ghost Ride |
+| Zombie Horse | 7 | Gallop | Rotten Kick | Undead Charge | Undead Strength |
+| Fox | 5 | Fox Pounce | Sneaky | Fox Ambush | Night Hunter |
+| Frog | 5 | Tongue Grab | Big Hop | Gulp | Lily Pad Leap |
+| Mooshroom | 5 | Mushroom Stew | Spore Cloud | Mushroom Stampede | Fungus Shield |
+| Ocelot | 5 | Jungle Dash | Hiss | Pounce Strike | Jungle Stealth |
+| Parrot | 3 | Mimic | Flutter | Dive Bomb | Feather Storm |
+| Pig | 5 | Mud Roll | Oink Charge | Pig Rocket | Truffle Snack |
+| Rabbit | 3 | Super Hop | Carrot Snack | Killer Bunny Bite | Burrow Escape |
+| Sheep | 4 | Wool Shield | Grass Snack | Rainbow Wool Blast | Fluffy Bounce |
+| Sniffer | 7 | Sniff | Dig | Ancient Stomp | Dig Up Treasure |
+| Villager | 10 | Bargain | Bread Snack | Call Iron Golem | Panic Run |
+| Wandering Trader | 10 | Invisibility Potion | Milk Bucket | Call 2 Llamas | Wander Teleport |
+| Bee | 5 | Sting | Pollinate | Bee Swarm | Honey Shield |
+| Goat | 5 | Ram | Goat Leap | Mega Ram | Goat Horn |
+| Llama | 11 | Spit | Kick | Spit Storm | Llama Drama |
+| Trader Llama | 11 | Spit | Kick | Spit Storm | Caravan |
+| Panda | 10 | Panda Roll | Bamboo Snack | Panda Slam | Mega Sneeze |
+| Polar Bear | 15 | Bear Swipe | Roar | Ice Slam | Mama Bear Rage |
+| Wolf | 8 | Bite | Howl | Wolf Pack | Hunt |
+
+### Water mobs (breathe underwater, swim fast)
+
+| Mob | Hearts | G | H | B (super) | N (super) |
+|---|---|---|---|---|---|
+| Axolotl | 7 | Play Dead | Water Splash | Tidal Bite | Bubble Shield |
+| Cod | 3 | Flop Jump | Bubbles | Fish Frenzy | Swim Rocket |
+| Salmon | 3 | Upstream Leap | Bubbles | Fish Frenzy | Swim Rocket |
+| Tropical Fish | 3 | Color Flash | Bubbles | Rainbow Blast | Coral Hide |
+| Pufferfish | 3 | Puff Up | Spikes | Toxic Burst | Spike Shield |
+| Squid | 5 | Ink Cloud | Jet | Ink Bomb | Tentacle Grab |
+| Glow Squid | 5 | Glow Ink | Jet | Glow Burst | Light Up |
+| Dolphin | 5 | Dolphin's Grace | Treasure Sense | Dolphin Ram | Big Splash |
+| Turtle | 15 | Shell Shield | Swim Boost | Shell Spin | Turtle Master |
+| Tadpole | 3 | Wiggle | Tiny Hop | Bubble Burst | Hide |
+| Guardian | 15 | Laser | Spikes | Laser Charge | Swim Boost |
+| Drowned | 10 | Trident Throw | Swim Speed | Thunder Trident | Drowned Pull |
+
+### Nether mobs
+
+| Mob | Hearts | G | H | B (super) | N (super) |
+|---|---|---|---|---|---|
+| Strider | 10 | Hot Feet | Shiver | Lava Splash | Heat Shield |
+| Ghast | 5 | Fireball | Cry | Fireball Barrage | Ghast Float |
+| Magma Cube | 8 | Big Bounce | Fire Splash | Magma Slam | Split |
+| Hoglin | 20 | Tusk Toss | Charge | Stampede | Hoglin Roar |
+| Zoglin | 20 | Tusk Toss | Charge | Zoglin Rampage | Undead Toughness |
+| Piglin | 8 | Crossbow Shot | Barter | Golden Sword Spin | Piglin Army |
+| Piglin Brute | 25 | Axe Chop | Brute Rage | Axe Spin | Unstoppable |
+| Zombified Piglin | 10 | Gold Sword Slash | Angry Call | Horde | Fire Shield |
+
+### Monsters
+
+| Mob | Hearts | G | H | B (super) | N (super) |
+|---|---|---|---|---|---|
+| Cave Spider | 6 | Poison Bite | Web | Toxic Web Net | Tiny Sneak |
+| Husk | 10 | Hunger Bite | Sand Cloud | Sandstorm | Desert Toughness |
+| Stray | 10 | Frost Arrow | Ice Walk | Frost Arrow Volley | Ice Armor |
+| Zombie Villager | 10 | Zombie Bite | Golden Apple | Zombie Mob | Villager Shield |
+| Endermite | 4 | Nibble | Tiny Teleport | Mite Swarm | Hide |
+| Silverfish | 4 | Nibble | Stone Hide | Silverfish Swarm | Stone Skin |
+| Slime | 8 | Bounce | Slime Slap | Mega Bounce Slam | Split |
+| Phantom | 10 | Swoop | Night Fly | Dive Bomb | Insomnia Curse |
+| Shulker | 15 | Levitation Bullet | Shell Close | Bullet Barrage | Shulker Teleport |
+| Witch | 13 | Splash Potion | Drink Potion | Potion Barrage | Witch Brew |
+| Pillager | 12 | Crossbow Shot | Firework Shot | Crossbow Volley | Patrol |
+| Vindicator | 12 | Axe Swing | Johnny Rage | Axe Whirl | Raid Charge |
+| Evoker | 12 | Fang Line | Vex Call | Fang Circle | Totem Shield |
+| Vex | 7 | Phase Charge | Ghost Fly | Vex Swarm | Ghost |
+| Ravager | 50 | Roar | Bite | Rampage | Mega Roar |
+
+### Bosses (very strong, but player-sized)
+
+| Mob | Hearts | G | H | B (super) | N (super) |
+|---|---|---|---|---|---|
+| Warden | 100 | Sonic Boom | Darkness Pulse | Mega Sonic Boom | Sense |
+| Elder Guardian | 40 | Laser | Mining Curse | Mega Laser | Spike Shell |
+| Wither | 100 | Wither Skull | Wither Aura | Blue Skull Barrage | Wither Armor |
+| Ender Dragon | 100 | Dragon Fireball | Wing Blast | Dragon Breath Storm | Dragon Roar |
+
+**Helpers** fight monsters for you for 30 seconds, then vanish. They never hurt players.
+**Spikes** hurt whatever hits you. **Stubborn**, **Unstoppable**, **Shell Close** and similar powers stop you being knocked back.
+
 ## Golden forms
 
 Scanning a mob counts toward its Golden form. Scan **10 different mobs of the same kind** (e.g. 10 different zombies) to unlock it. Golden forms have 50% more hearts, stronger powers and gold sparkles. The mob menu shows your progress, like "4/10".
@@ -89,7 +187,7 @@ Scanning a mob counts toward its Golden form. Scan **10 different mobs of the sa
 
 ## Achievements
 
-Open Advancements (L) and find the **Morph Watch** tab. It has: DNA Collector, Mob Encyclopedia, Gold Standard, Power Up, Fully Charged, Master of Powers, Close Call, Shiny Upgrade and Ultimate Watch.
+Open Advancements (L) and find the **Morph Watch** tab. Mob Encyclopedia now means scanning all 77 mobs. It has: DNA Collector, Mob Encyclopedia, Gold Standard, Power Up, Fully Charged, Master of Powers, Close Call, Shiny Upgrade and Ultimate Watch.
 
 Your watch, scans and achievements stay with you when you die. Your form resets to human.
 

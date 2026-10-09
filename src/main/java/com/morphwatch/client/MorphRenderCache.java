@@ -5,6 +5,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ambient.Bat;
+import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.player.Player;
 
 import java.util.HashMap;
@@ -23,7 +24,11 @@ public final class MorphRenderCache {
         if (mob == null || mob.getType() != form.type() || mob.level() != player.level()) {
             mob = form.type().create(player.level());
             if (mob == null) return null;
-            if (mob instanceof Mob m) m.setNoAi(true);
+            if (mob instanceof EnderDragon dragon) {
+                dragon.setSilent(true);         // its own flying code runs, but no roars
+            } else if (mob instanceof Mob m) {
+                m.setNoAi(true);
+            }
             if (mob instanceof Bat bat) bat.setResting(false);
             if (mob instanceof net.minecraft.world.entity.monster.Slime slime) slime.setSize(2, false);
             CACHE.put(player.getUUID(), mob);
@@ -90,7 +95,23 @@ public final class MorphRenderCache {
                 continue;
             }
             entry.getValue().walkAnimation.update(player.walkAnimation.speed(), 1.0F);
+            if (entry.getValue() instanceof EnderDragon dragon) tickDragon(player, dragon);
         }
+    }
+
+    /**
+     * The dragon is drawn from its own flight history, not its rotation, so it has to run its
+     * flying code to turn and flap. Its head points the opposite way to other mobs.
+     */
+    private static void tickDragon(Player player, EnderDragon dragon) {
+        dragon.setPos(player.getX(), player.getY(), player.getZ());
+        dragon.setYRot(player.getYRot() + 180.0F);
+        try {
+            dragon.aiStep();
+        } catch (RuntimeException ignored) {
+            // never let the dragon's own code break the game
+        }
+        dragon.setPos(player.getX(), player.getY(), player.getZ());
     }
 
     public static void clear() {
