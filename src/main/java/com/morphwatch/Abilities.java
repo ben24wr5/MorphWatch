@@ -107,7 +107,7 @@ public final class Abilities {
         MorphData.sync(player);
     }
 
-    // ================================================================ R powers
+    // ================================================================ G powers
 
     private static boolean power1(ServerPlayer p, MorphForm form, float s) {
         return switch (form) {
