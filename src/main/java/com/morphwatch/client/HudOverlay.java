@@ -51,7 +51,7 @@ public final class HudOverlay implements IGuiOverlay {
         g.fill(x, y + h - 1, x + w, y + h, GOLD);
 
         // Icon: the mob's spawn egg, or the watch when human
-        ItemStack icon = com.morphwatch.MorphWatchItem.withUpgrades(MorphData.upgrades(player));
+        ItemStack icon = com.morphwatch.MorphWatchItem.makeWatch(MorphData.upgrades(player), MorphData.strapColour(player), null);
         if (form != MorphForm.NONE) {
             SpawnEggItem egg = SpawnEggItem.byId(form.type());
             if (egg != null) icon = new ItemStack(egg);

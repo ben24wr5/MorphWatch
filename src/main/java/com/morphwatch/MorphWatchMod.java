@@ -9,6 +9,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.inventory.MenuType;
+import net.minecraftforge.common.extensions.IForgeMenuType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -27,6 +29,9 @@ public class MorphWatchMod {
 
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, MODID);
+    public static final DeferredRegister<MenuType<?>> MENUS = DeferredRegister.create(ForgeRegistries.MENU_TYPES, MODID);
+    public static final RegistryObject<MenuType<WatchWorkbenchMenu>> WORKBENCH_MENU = MENUS.register("watch_workbench",
+            () -> IForgeMenuType.create((id, inventory, data) -> new WatchWorkbenchMenu(id, inventory)));
 
     public static final DeferredRegister<CreativeModeTab> TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
 
@@ -51,7 +56,6 @@ public class MorphWatchMod {
                 out.accept(RECHARGE_CRYSTAL.get());
                 out.accept(WATCH_WORKBENCH_ITEM.get());
                 // To craft it
-                out.accept(Items.CRAFTING_TABLE);
                 out.accept(Items.GOLD_BLOCK);
                 out.accept(Items.RED_WOOL);
                 out.accept(Items.ENDER_PEARL);
@@ -65,6 +69,7 @@ public class MorphWatchMod {
     public MorphWatchMod() {
         IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
         BLOCKS.register(modBus);
+        MENUS.register(modBus);
         ITEMS.register(modBus);
         TABS.register(modBus);
         modBus.addListener(this::commonSetup);

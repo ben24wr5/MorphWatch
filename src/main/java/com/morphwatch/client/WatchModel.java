@@ -159,7 +159,9 @@ public final class WatchModel {
                             boolean raised, float ageInTicks, float pop, float dialTurn) {
         Parts p = parts(player);
         VertexConsumer metal = buffers.getBuffer(RenderType.entityCutoutNoCull(TEXTURE));
-        p.band.render(poseStack, metal, light, OverlayTexture.NO_OVERLAY);
+        int tint = strapTint(MorphData.strapColour(player));
+        p.band.render(poseStack, metal, light, OverlayTexture.NO_OVERLAY,
+                ((tint >> 16) & 255) / 255.0F, ((tint >> 8) & 255) / 255.0F, (tint & 255) / 255.0F, 1.0F);
         renderGems(poseStack, buffers, player, p, raised);
         ModelPart face = p.sideFace;
 
@@ -230,6 +232,17 @@ public final class WatchModel {
             p.gem.render(poseStack, vc, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, c[0], c[1], c[2], 1.0F);
             poseStack.popPose();
         }
+    }
+
+    /**
+     * The strap texture is grey (its main shade is 80% white), so this brightens the colour a little
+     * so the strap's main shade comes out exactly the colour it was dyed.
+     */
+    static int strapTint(int rgb) {
+        int r = Math.min(255, Math.round(((rgb >> 16) & 255) / 0.8F));
+        int g = Math.min(255, Math.round(((rgb >> 8) & 255) / 0.8F));
+        int b = Math.min(255, Math.round((rgb & 255) / 0.8F));
+        return (r << 16) | (g << 8) | b;
     }
 
     /** The middle of the raised dial (inside the face), in the current pose's space. */

@@ -31,6 +31,13 @@ public final class MorphData {
     public static final String FORM = "form";
     public static final String TIER = "tier";            // 0 = not wearing, 1 = wearing (2/3 = old diamond/netherite watches)
     public static final String UPGRADES = "upgrades";    // bits: gems put into the watch
+    public static final String STRAP = "strap";          // strap colour (RGB) of the watch you're wearing
+    public static final String STRAP_NAME = "strapname";
+
+    public static int strapColour(Player player) {
+        CompoundTag root = root(player);
+        return root.contains(STRAP) ? root.getInt(STRAP) : MorphWatchItem.DEFAULT_STRAP;
+    }
 
     /** Watch upgrades (gems). Each has its own bonus and they all stack. */
     public static final int GOLD = 1;       // faster recharge

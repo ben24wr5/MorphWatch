@@ -12,15 +12,15 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.SimpleMenuProvider;
+import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 
 /**
- * The Watch Workbench. Right-click it while wearing the watch:
- *  - holding a gold ingot, diamond or emerald: puts it into the watch (same as left-clicking with it),
- *  - otherwise: shows which gems your watch has and which are still missing.
- * (Watch styles - faces, strap colours and so on - will be added here later.)
+ * The Watch Workbench. Right-click it to open a crafting-table-style screen: put your Morph Watch
+ * in with dyes to change the strap colour, or with a gold ingot, diamond or emerald to add that gem.
  */
 public class WatchWorkbenchBlock extends Block {
     public WatchWorkbenchBlock(Properties properties) {
@@ -31,25 +31,10 @@ public class WatchWorkbenchBlock extends Block {
     @SuppressWarnings("deprecation")
     public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand,
                                  BlockHitResult hit) {
-        if (hand != InteractionHand.MAIN_HAND) return InteractionResult.PASS;
         if (level.isClientSide()) return InteractionResult.SUCCESS;
-        if (!(player instanceof ServerPlayer sp)) return InteractionResult.PASS;
-        if (!MorphData.isWearing(sp)) {
-            WatchActions.tell(sp, "Put on your Morph Watch, then use the workbench to upgrade it", ChatFormatting.YELLOW);
-            return InteractionResult.CONSUME;
-        }
-        ItemStack held = sp.getMainHandItem();
-        if (held.is(Items.GOLD_INGOT) || held.is(Items.DIAMOND) || held.is(Items.EMERALD)) {
-            WatchActions.upgrade(sp);
-            return InteractionResult.CONSUME;
-        }
-        level.playSound(null, pos, SoundEvents.UI_STONECUTTER_TAKE_RESULT, SoundSource.BLOCKS, 1.0F, 1.0F);
-        sp.sendSystemMessage(Component.literal("Your Morph Watch:").withStyle(ChatFormatting.GOLD));
-        sp.sendSystemMessage(line(sp, MorphData.GOLD, "Gold ingot", "everything recharges faster", ChatFormatting.GOLD));
-        sp.sendSystemMessage(line(sp, MorphData.DIAMOND, "Diamond", "stronger powers", ChatFormatting.AQUA));
-        sp.sendSystemMessage(line(sp, MorphData.EMERALD, "Emerald", "5 more hearts", ChatFormatting.GREEN));
-        sp.sendSystemMessage(Component.literal("Hold a missing one and right-click the workbench to add it")
-                .withStyle(ChatFormatting.GRAY));
+        player.openMenu(new SimpleMenuProvider(
+                (id, inventory, p) -> new WatchWorkbenchMenu(id, inventory, ContainerLevelAccess.create(level, pos)),
+                Component.translatable("container.morphwatch.watch_workbench")));
         return InteractionResult.CONSUME;
     }
 

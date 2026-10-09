@@ -64,6 +64,20 @@ public final class ClientEvents {
 
     @Mod.EventBusSubscriber(modid = MorphWatchMod.MODID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
     public static final class ModBus {
+        /** The Watch Workbench screen. */
+        @SubscribeEvent
+        public static void onClientSetup(net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent event) {
+            event.enqueueWork(() -> net.minecraft.client.gui.screens.MenuScreens.register(
+                    MorphWatchMod.WORKBENCH_MENU.get(), WatchWorkbenchScreen::new));
+        }
+
+        /** The watch icon's strap takes the colour it was dyed. */
+        @SubscribeEvent
+        public static void onItemColours(net.minecraftforge.client.event.RegisterColorHandlersEvent.Item event) {
+            event.register((stack, layer) -> layer == 1 ? WatchModel.strapTint(com.morphwatch.MorphWatchItem.strap(stack)) : -1,
+                    MorphWatchMod.MORPH_WATCH.get());
+        }
+
         @SubscribeEvent
         public static void onRegisterKeys(RegisterKeyMappingsEvent event) {
             event.register(SUPER_1_KEY);

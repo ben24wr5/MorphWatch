@@ -1,6 +1,7 @@
 package com.morphwatch;
 
 import net.minecraft.ChatFormatting;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.world.item.Items;
 import net.minecraft.core.particles.ParticleTypes;
@@ -27,6 +28,13 @@ public final class WatchActions {
             return;
         }
         int bits = MorphWatchItem.upgrades(stack);
+        CompoundTag root = MorphData.root(player);
+        root.putInt(MorphData.STRAP, MorphWatchItem.strap(stack));
+        if (stack.hasTag() && stack.getTag().contains(MorphWatchItem.STRAP_NAME_TAG)) {
+            root.putString(MorphData.STRAP_NAME, stack.getTag().getString(MorphWatchItem.STRAP_NAME_TAG));
+        } else {
+            root.remove(MorphData.STRAP_NAME);
+        }
         if (!player.getAbilities().instabuild) {
             stack.shrink(1);
         }
@@ -158,7 +166,11 @@ public final class WatchActions {
             Transformer.playAnimation(player, MorphData.getForm(player), MorphForm.NONE, Transformer.MIN_ANIM_TICKS);
         }
         MorphData.setForm(player, MorphForm.NONE);
-        ItemStack watch = MorphWatchItem.withUpgrades(MorphData.upgrades(player));
+        CompoundTag root = MorphData.root(player);
+        ItemStack watch = MorphWatchItem.makeWatch(MorphData.upgrades(player), MorphData.strapColour(player),
+                root.contains(MorphData.STRAP_NAME) ? root.getString(MorphData.STRAP_NAME) : null);
+        root.remove(MorphData.STRAP);
+        root.remove(MorphData.STRAP_NAME);
         MorphData.setTier(player, 0);
         MorphData.setUpgrades(player, 0);
         MorphData.applyHealth(player, MorphForm.NONE);   // the emerald's hearts go with the watch
