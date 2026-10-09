@@ -32,12 +32,12 @@ final class DialRing {
     private static final ResourceLocation TEXTURE =
             new ResourceLocation(MorphWatchMod.MODID, "textures/misc/hologram.png");
 
-    static final float INNER = 2.5F;          // just outside the gold case
-    static final float OUTER = 5.4F;
+    static final float INNER = 2.4F;          // just outside the gold case
+    static final float OUTER = 4.9F;
     private static final float SLOT_DEGREES = 38.0F;
     private static final float TOP_HALF = 95.0F;   // icons live between -95 and +95 degrees
-    private static final float ICON = 1.5F;
-    private static final float ICON_SELECTED = 2.0F;
+    private static final float ICON = 1.4F;
+    private static final float ICON_SELECTED = 1.9F;
 
     private static final int[] LIME = {190, 255, 70};
     private static final int[] LIME_BRIGHT = {225, 255, 120};
