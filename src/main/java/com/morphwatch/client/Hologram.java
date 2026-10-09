@@ -6,6 +6,11 @@ import com.morphwatch.MorphData;
 import com.morphwatch.MorphForm;
 import com.morphwatch.MorphWatchMod;
 import net.minecraft.client.Camera;
+import org.joml.Matrix4f;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -48,7 +53,7 @@ public final class Hologram {
 
     public static void setRemote(Player player, int ordinal) {
         long now = player.level().getGameTime();
-        if (ordinal <= 0) {
+        if (ordinal < 0) {
             REMOTE.remove(player.getUUID());
             return;
         }
@@ -87,10 +92,15 @@ public final class Hologram {
         }
     }
 
-    /** Which mob this player's dial shows, or null if their dial is down. */
+    /**
+     * Which mob this player's dial shows, MorphForm.NONE for an empty dial (nothing scanned yet),
+     * or null if their dial is down.
+     */
     private static MorphForm shownForm(Minecraft mc, Player player) {
         if (player == mc.player) {
-            return ClientState.dialOpen ? Dial.selected(player) : null;
+            if (!ClientState.dialOpen) return null;
+            MorphForm selected = Dial.selected(player);
+            return selected == null ? MorphForm.NONE : selected;
         }
         Remote remote = REMOTE.get(player.getUUID());
         return remote == null ? null : MorphForm.byOrdinal(remote.ordinal());
@@ -128,7 +138,7 @@ public final class Hologram {
 
         for (Player player : mc.level.players()) {
             MorphForm form = shownForm(mc, player);
-            if (form == null || form == MorphForm.NONE) continue;
+            if (form == null) continue;
             boolean self = player == mc.player;
             boolean firstPerson = self && mc.options.getCameraType().isFirstPerson();
             if (player.isInvisible() && !self) continue;
@@ -146,6 +156,15 @@ public final class Hologram {
             float rise = TransformAnims.ease((now - openedAt) / RISE_TICKS);
             float pop = 0.7F + 0.3F * TransformAnims.ease((now - changedAt) / POP_TICKS);
 
+            Vec3 base = anchor(player, partialTick, firstPerson).add(0, 0.12 + 0.18 * rise, 0);
+            float target = firstPerson ? HOLO_HEIGHT_FIRST_PERSON : HOLO_HEIGHT;
+
+            if (form == MorphForm.NONE) {
+                renderEmpty(mc, poseStack, camera, buffers, base.subtract(cam), target * rise * pop, now);
+                drewAny = true;
+                continue;
+            }
+
             LivingEntity mob = model(form, mc.level);
             if (mob == null) continue;
             mob.tickCount = (int) now;
@@ -156,9 +175,7 @@ public final class Hologram {
             MultiBufferSource holo = type -> new HoloVertexConsumer(
                     buffers.getBuffer(RenderType.entityTranslucentEmissive(TEXTURE)), r, g, b, 170 + flicker);
 
-            Vec3 base = anchor(player, partialTick, firstPerson).add(0, 0.12 + 0.18 * rise, 0);
             float size = Math.max(mob.getBbHeight(), mob.getBbWidth());
-            float target = firstPerson ? HOLO_HEIGHT_FIRST_PERSON : HOLO_HEIGHT;
             float scale = target / Math.max(0.2F, size) * rise * pop;
             if (scale <= 0.001F) continue;
 
@@ -172,5 +189,35 @@ public final class Hologram {
             drewAny = true;
         }
         if (drewAny) buffers.endBatch();
+    }
+
+    /** Empty dial: a spinning blue watch with a big gold "?" floating above it. */
+    private static void renderEmpty(Minecraft mc, PoseStack poseStack, Camera camera,
+                                    MultiBufferSource.BufferSource buffers, Vec3 at, float height, float now) {
+        if (height <= 0.001F) return;
+        MultiBufferSource holo = type -> new HoloVertexConsumer(
+                buffers.getBuffer(RenderType.entityTranslucentEmissive(TEXTURE)), 90, 225, 255, 180);
+
+        poseStack.pushPose();
+        poseStack.translate(at.x, at.y + height * 0.3, at.z);
+        poseStack.mulPose(Axis.YP.rotationDegrees(now * 4.0F));
+        poseStack.scale(height * 0.9F, height * 0.9F, height * 0.9F);
+        mc.getItemRenderer().renderStatic(new ItemStack(MorphWatchMod.MORPH_WATCH.get()), ItemDisplayContext.FIXED,
+                LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, poseStack, holo, mc.level, 0);
+        poseStack.popPose();
+
+        // The "?" always faces you, like a name tag
+        poseStack.pushPose();
+        poseStack.translate(at.x, at.y + height * 0.95, at.z);
+        poseStack.mulPose(camera.rotation());
+        float textScale = 0.025F * height / HOLO_HEIGHT * 1.6F;
+        poseStack.scale(-textScale, -textScale, textScale);
+        Font font = mc.font;
+        String q = "?";
+        float bob = Mth.sin(now * 0.15F) * 1.5F;
+        Matrix4f matrix = poseStack.last().pose();
+        font.drawInBatch(q, -font.width(q) / 2.0F, bob, 0xFFE0B040, false, matrix, buffers,
+                Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
+        poseStack.popPose();
     }
 }

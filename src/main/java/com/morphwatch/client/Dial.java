@@ -54,12 +54,8 @@ public final class Dial {
             return;
         }
         List<MorphForm> list = choices(player);
-        if (list.isEmpty()) {
-            player.displayClientMessage(Component.literal("Scan a mob first: look at it and press G")
-                    .withStyle(ChatFormatting.YELLOW), true);
-            return;
-        }
-        // Start on your current mob if it's on the dial
+        // Start on your current mob if it's on the dial. With nothing scanned yet the dial
+        // still pops up, showing a "?" hologram.
         int start = list.indexOf(MorphData.getForm(player));
         ClientState.dialIndex = Math.max(0, start);
         ClientState.dialOpen = true;
@@ -68,6 +64,10 @@ public final class Dial {
         ClientState.dialChangedAt = now;
         click(1.4F);
         sendDial(selected(player));
+        if (list.isEmpty()) {
+            player.displayClientMessage(Component.literal("No mobs on your dial yet: look at a mob and press G to scan it")
+                    .withStyle(ChatFormatting.YELLOW), true);
+        }
     }
 
     public static void close(Minecraft mc, boolean tellServer) {
@@ -100,16 +100,22 @@ public final class Dial {
             return;
         }
         MorphForm form = selected(player);
-        close(mc, false);
-        if (form == null) return;
         ClientState.shakeTicks = ClientState.SHAKE_TICKS;
+        if (form == null) {
+            // Empty dial: still a satisfying slam, but nothing to turn into yet
+            close(mc, true);
+            player.displayClientMessage(Component.literal("Scan a mob first: look at it and press G")
+                    .withStyle(ChatFormatting.YELLOW), true);
+            return;
+        }
+        close(mc, false);
         ModNetwork.CHANNEL.sendToServer(new WatchActionPacket(WatchActionPacket.SLAM, form.ordinal()));
     }
 
+    /** Tells the server what the dial shows so friends see the hologram (0 = empty dial). */
     private static void sendDial(MorphForm form) {
-        if (form != null) {
-            ModNetwork.CHANNEL.sendToServer(new WatchActionPacket(WatchActionPacket.DIAL, form.ordinal()));
-        }
+        int ordinal = form == null ? 0 : form.ordinal();
+        ModNetwork.CHANNEL.sendToServer(new WatchActionPacket(WatchActionPacket.DIAL, ordinal));
     }
 
     private static void click(float pitch) {

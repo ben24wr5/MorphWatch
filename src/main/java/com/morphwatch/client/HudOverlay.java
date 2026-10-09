@@ -86,7 +86,15 @@ public final class HudOverlay implements IGuiOverlay {
         // The dial: which mob it's on, above the hotbar
         if (ClientState.dialOpen) {
             MorphForm shown = Dial.selected(player);
-            if (shown != null) {
+            if (shown == null) {
+                String label = "<   ?   >";
+                int ly = screenHeight - 72;
+                String hint = "No mobs yet - look at a mob and press G to scan it";
+                int lw = font.width(hint) + 16;
+                g.fill(screenWidth / 2 - lw / 2, ly - 4, screenWidth / 2 + lw / 2, ly + 22, 0xA0101010);
+                g.drawCenteredString(font, label, screenWidth / 2, ly, GOLD);
+                g.drawCenteredString(font, hint, screenWidth / 2, ly + 11, 0xA0A0A0);
+            } else {
                 java.util.List<MorphForm> choices = Dial.choices(player);
                 boolean gold = MorphData.isGolden(player, shown);
                 String label = "<   " + (gold ? "Golden " : "") + shown.displayName().getString() + "   >";
