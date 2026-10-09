@@ -376,10 +376,11 @@ public final class Hologram {
         side.sub(new Vector3f(dialAxis).mul(side.dot(dialAxis))).normalize();
         float follow = handFollowDegrees(player, partialTick);
         new Quaternionf().fromAxisAngleDeg(dialAxis.x(), dialAxis.y(), dialAxis.z(), follow).transform(side);
-        float gripRadius = (1.5F + 2.7F) / 16.0F;                                // dial edge + half a hand
+        // The hand presses right against the side of the dial (on top of the ring), not over its face
+        float gripRadius = (1.5F + 1.9F) / 16.0F;                                // dial edge + half a hand
         Vector3f fingertips = new Vector3f(dialCentre)
                 .add(new Vector3f(side).mul(gripRadius))
-                .sub(new Vector3f(dialAxis).mul(1.2F / 16.0F));
+                .sub(new Vector3f(dialAxis).mul(0.3F / 16.0F));
         Vector3f shoulder = new Vector3f(dialCentre).add(0.45F, -0.55F, 0.35F);   // off the bottom right of the screen
         Vector3f rightAlong = new Vector3f(fingertips).sub(shoulder);
         Quaternionf rightRot = armRotation(rightAlong, new Vector3f(side).negate());
