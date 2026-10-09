@@ -6,9 +6,9 @@
   "key.categories.morphwatch": "Morph Watch",
   "key.morphwatch.dial": "Pop Up Dial",
   "key.morphwatch.slam": "Transform (slam watch)",
-  "key.morphwatch.super_r": "Super Power R",
-  "key.morphwatch.super_t": "Super Power T",
   "key.morphwatch.power_g": "Mob Power G (hold to charge)",
   "key.morphwatch.power_h": "Mob Power H",
-  "key.morphwatch.scan_mob": "Scan Mob (look at it)"
+  "key.morphwatch.scan_mob": "Scan Mob (look at it)",
+  "key.morphwatch.super_b": "Super Power B",
+  "key.morphwatch.super_n": "Super Power N"
 }

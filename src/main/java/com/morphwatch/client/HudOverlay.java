@@ -66,7 +66,7 @@ public final class HudOverlay implements IGuiOverlay {
 
         int barY = y + 28;
         if (form != MorphForm.NONE) {
-            String[] keys = {"G", "H", "R", "T"};
+            String[] keys = {"G", "H", "B", "N"};
             for (int slot = 1; slot <= 4; slot++) {
                 bar(g, font, keys[slot - 1], x + 4, barY, w - 8, data.getLong(MorphData.cdKey(slot)),
                         data.getLong(MorphData.cdLenKey(slot)), now, slot >= 3);

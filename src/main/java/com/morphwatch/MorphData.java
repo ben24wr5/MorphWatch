@@ -35,9 +35,9 @@ public final class MorphData {
     public static final String CD1_LEN = "cd1len";
     public static final String CD2 = "cd2";
     public static final String CD2_LEN = "cd2len";
-    public static final String CD3 = "cd3";              // super power R
+    public static final String CD3 = "cd3";              // super power B
     public static final String CD3_LEN = "cd3len";
-    public static final String CD4 = "cd4";              // super power T
+    public static final String CD4 = "cd4";              // super power N
     public static final String CD4_LEN = "cd4len";
     public static final String CLOAK = "cloak";          // game time when Camouflage / Shadow Cloak ends
     public static final String ESCAPE = "escape";        // game time when auto-escape is ready
@@ -50,7 +50,7 @@ public final class MorphData {
 
     private MorphData() {}
 
-    /** Cooldown key for a power slot: 1 = G, 2 = H, 3 = R (super), 4 = T (super). */
+    /** Cooldown key for a power slot: 1 = G, 2 = H, 3 = B (super), 4 = N (super). */
     public static String cdKey(int slot) {
         return switch (slot) { case 1 -> CD1; case 2 -> CD2; case 3 -> CD3; default -> CD4; };
     }

@@ -33,7 +33,7 @@ import java.util.List;
 
 /**
  * Each form has four powers. Regular: G (power 1, hold to charge) and H (power 2).
- * Super: R and T, which live in {@link SuperPowers}.
+ * Super: B and N, which live in {@link SuperPowers}.
  * "s" is the strength: 1.0 normal, x2 when charged, more with a better watch or a golden form.
  */
 public final class Abilities {
@@ -70,16 +70,16 @@ public final class Abilities {
         boolean used = switch (slot) {
             case 1 -> power1(player, form, s);
             case 2 -> power2(player, form, s, targetId);
-            case 3 -> SuperPowers.superR(player, form, s, targetId);
-            default -> SuperPowers.superT(player, form, s, targetId);
+            case 3 -> SuperPowers.superB(player, form, s, targetId);
+            default -> SuperPowers.superN(player, form, s, targetId);
         };
         if (!used) return;
 
         int base = switch (slot) {
             case 1 -> form.cooldown1();
             case 2 -> form.cooldown2();
-            case 3 -> SuperPowers.R_COOLDOWN;
-            default -> SuperPowers.T_COOLDOWN;
+            case 3 -> SuperPowers.B_COOLDOWN;
+            default -> SuperPowers.N_COOLDOWN;
         };
         long cooldown = Math.max(5, Math.round(base * MorphData.cooldownMultiplier(MorphData.tier(player)) * (charged ? 1.5 : 1.0)));
         data.putLong(cdKey, now + cooldown);

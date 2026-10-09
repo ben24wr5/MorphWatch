@@ -13,7 +13,7 @@ import java.util.Locale;
 
 /**
  * Every mob the watch can turn you into.
- * Powers (G and H) live in {@link Abilities}, super powers (R and T) in {@link SuperPowers}, punch effects in {@link MobAttacks}.
+ * Powers (G and H) live in {@link Abilities}, super powers (B and N) in {@link SuperPowers}, punch effects in {@link MobAttacks}.
  */
 public enum MorphForm {
     NONE(null, 20, 0, 0, 0, null, kin()),

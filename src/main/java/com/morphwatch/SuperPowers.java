@@ -45,13 +45,13 @@ import java.util.UUID;
 import java.util.WeakHashMap;
 
 /**
- * The two SUPER powers every mob has: R and T. They're big and flashy and take longer to
+ * The two SUPER powers every mob has: B and N. They're big and flashy and take longer to
  * recharge than the regular G and H powers. "s" is the strength (better watch / golden form).
  */
 public final class SuperPowers {
     /** Base recharge times (ticks) before the watch tier speeds them up. */
-    public static final int R_COOLDOWN = 400;   // 20 seconds
-    public static final int T_COOLDOWN = 300;   // 15 seconds
+    public static final int B_COOLDOWN = 400;   // 20 seconds
+    public static final int N_COOLDOWN = 300;   // 15 seconds
 
     public static final String HELPER_TAG = "morphwatch_helper";
     private static final String HELPER_UNTIL = "morphwatch_until";
@@ -85,9 +85,9 @@ public final class SuperPowers {
         };
     }
 
-    // ================================================================ R super powers
+    // ================================================================ B super powers
 
-    public static boolean superR(ServerPlayer p, MorphForm form, float s, int targetId) {
+    public static boolean superB(ServerPlayer p, MorphForm form, float s, int targetId) {
         Vec3 look = p.getLookAngle();
         ServerLevel level = p.serverLevel();
         return switch (form) {
@@ -269,9 +269,9 @@ public final class SuperPowers {
         };
     }
 
-    // ================================================================ T super powers
+    // ================================================================ N super powers
 
-    public static boolean superT(ServerPlayer p, MorphForm form, float s, int targetId) {
+    public static boolean superN(ServerPlayer p, MorphForm form, float s, int targetId) {
         Vec3 look = p.getLookAngle();
         ServerLevel level = p.serverLevel();
         return switch (form) {

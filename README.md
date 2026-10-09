@@ -13,17 +13,15 @@ A gold watch with a red strap that you wear on your wrist. Scan mobs to unlock t
 | **X** | Raise your arm and open the dial (press X again to close it) |
 | **Scroll wheel** (dial up) | Up = turn right (next mob), down = turn left (previous mob). Locked mobs show a **?** |
 | **Sneak + V** | Back to human |
-| **R** | Super power R |
-| **T** | Super power T |
+| **B** | Super power B |
+| **N** | Super power N |
 | **G** | Mob power. **Hold G** for 1.5 seconds for a charged, double-strength power |
 | **H** | Second mob power |
 | **J** | Take the watch off |
 
 Change keys in Options → Controls → Key Binds → Morph Watch.
 
-**Chat moves to Y.** T is normally Minecraft's chat key. The first time you play with this version, the mod moves chat to **Y** and tells you. You can change it in Controls.
-
-The panel in the top-left corner shows your mob, your watch, how many mobs you've scanned, and bars for when G, H, R, T and C (the next transform) are ready. The R and T bars are gold. A beep plays when a power has recharged, and a chime when a super power has.
+The panel in the top-left corner shows your mob, your watch, how many mobs you've scanned, and bars for when G, H, B, N and C (the next transform) are ready. The B and N bars are gold. A beep plays when a power has recharged, and a chime when a super power has.
 
 ## The dial and transformation
 
@@ -54,11 +52,11 @@ Turning back to human never has to wait.
 | Bat | 3 | Fly, night vision | Echolocation: mobs glow | Screech: confuse mobs | — |
 | Snow Golem | 2 | — | Snowball burst | Freeze mobs and lay snow | Freezes |
 
-### Super powers (R and T)
+### Super powers (B and N)
 
-Super powers are bigger than G and H and take longer to recharge: 20 seconds for R and 15 for T with the gold watch (faster with diamond or netherite).
+Super powers are bigger than G and H and take longer to recharge: 20 seconds for B and 15 for N with the gold watch (faster with diamond or netherite).
 
-| Mob | R super power | T super power |
+| Mob | B super power | N super power |
 |---|---|---|
 | Chicken | Egg Storm: a fan of 16 eggs pelts everything in front | Super Flutter: rocket up, float down, blow mobs away |
 | Cat | Claw Dash: zoom forward slashing everything in your way | Scare Creepers: creepers run off, other monsters get scared and weak |

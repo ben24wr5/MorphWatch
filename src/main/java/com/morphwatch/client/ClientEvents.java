@@ -43,10 +43,10 @@ import java.util.Deque;
 public final class ClientEvents {
     private static final String CATEGORY = "key.categories.morphwatch";
     // New key names (not the old ones) so the new default keys apply even if old ones were saved
-    public static final KeyMapping SUPER_R_KEY = new KeyMapping(
-            "key.morphwatch.super_r", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_R, CATEGORY);
-    public static final KeyMapping SUPER_T_KEY = new KeyMapping(
-            "key.morphwatch.super_t", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_T, CATEGORY);
+    public static final KeyMapping SUPER_1_KEY = new KeyMapping(
+            "key.morphwatch.super_b", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_B, CATEGORY);
+    public static final KeyMapping SUPER_2_KEY = new KeyMapping(
+            "key.morphwatch.super_n", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_N, CATEGORY);
     public static final KeyMapping POWER_KEY = new KeyMapping(
             "key.morphwatch.power_g", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_G, CATEGORY);
     public static final KeyMapping POWER2_KEY = new KeyMapping(
@@ -66,8 +66,8 @@ public final class ClientEvents {
     public static final class ModBus {
         @SubscribeEvent
         public static void onRegisterKeys(RegisterKeyMappingsEvent event) {
-            event.register(SUPER_R_KEY);
-            event.register(SUPER_T_KEY);
+            event.register(SUPER_1_KEY);
+            event.register(SUPER_2_KEY);
             event.register(POWER_KEY);
             event.register(POWER2_KEY);
             event.register(SCAN_KEY);
@@ -97,7 +97,6 @@ public final class ClientEvents {
     @Mod.EventBusSubscriber(modid = MorphWatchMod.MODID, value = Dist.CLIENT)
     public static final class ForgeBus {
         private static final boolean[] WAS_READY = {true, true, true, true};
-        private static boolean chatChecked = false;
         private static double scrollBuffer = 0;
         /** Whether each Pre pushed a pose that its Post must pop. */
         private static final Deque<Boolean> PUSHED = new ArrayDeque<>();
@@ -249,17 +248,12 @@ public final class ClientEvents {
                 scrollBuffer = 0;
             }
 
-            if (!chatChecked) {
-                chatChecked = true;
-                moveChatOffT(mc);
+            // B and N: super powers
+            while (SUPER_1_KEY.consumeClick()) {
+                if (inGame) send(WatchActionPacket.SUPER_1, crosshairTarget(mc));
             }
-
-            // R and T: super powers
-            while (SUPER_R_KEY.consumeClick()) {
-                if (inGame) send(WatchActionPacket.SUPER_R, crosshairTarget(mc));
-            }
-            while (SUPER_T_KEY.consumeClick()) {
-                if (inGame) send(WatchActionPacket.SUPER_T, crosshairTarget(mc));
+            while (SUPER_2_KEY.consumeClick()) {
+                if (inGame) send(WatchActionPacket.SUPER_2, crosshairTarget(mc));
             }
 
             // G: tap for a normal power, hold for a charged one.  H: the other power.
@@ -340,28 +334,6 @@ public final class ClientEvents {
                 mc.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.AMETHYST_BLOCK_CHIME, 1.2F, 1.0F));
             } else if (beep) {
                 mc.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.EXPERIENCE_ORB_PICKUP, 2.0F, 0.6F));
-            }
-        }
-
-        /**
-         * T is Minecraft's chat key. The first time the mod runs, if chat and the T super power are both
-         * on T, chat moves to Y (only once, so if you put chat back on T yourself, it stays there).
-         */
-        private static void moveChatOffT(Minecraft mc) {
-            java.nio.file.Path marker = net.minecraftforge.fml.loading.FMLPaths.CONFIGDIR.get().resolve("morphwatch-chat-moved.txt");
-            if (java.nio.file.Files.exists(marker)) return;
-            try {
-                java.nio.file.Files.writeString(marker, "Morph Watch moved chat from T to Y once. Delete this file to let it check again.\n");
-            } catch (java.io.IOException ignored) {
-            }
-            if (!mc.options.keyChat.same(SUPER_T_KEY)) return;
-            mc.options.keyChat.setKey(InputConstants.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_Y));
-            KeyMapping.resetMapping();
-            mc.options.save();
-            if (mc.player != null) {
-                mc.player.displayClientMessage(net.minecraft.network.chat.Component
-                        .literal("Morph Watch: T is now a super power, so chat moved to Y (change it in Controls)")
-                        .withStyle(net.minecraft.ChatFormatting.GOLD), false);
             }
         }
 
