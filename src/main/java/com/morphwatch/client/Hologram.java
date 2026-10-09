@@ -342,8 +342,9 @@ public final class Hologram {
         boolean slim = WatchModel.isSlim(player);
 
         // Left forearm: pointing forward and a little up and right, watch face up (tilted toward you)
-        Vector3f wrist = new Vector3f(-0.15F, -0.24F - (1.0F - rise) * 0.7F, -0.62F);
-        Quaternionf leftRot = armRotation(new Vector3f(0.22F, 0.28F, -1.0F), new Vector3f(0.0F, 1.0F, 0.35F));
+        // Wrist held low in front of you with the watch face tilted toward your eyes
+        Vector3f wrist = new Vector3f(-0.16F, -0.36F - (1.0F - rise) * 0.7F, -0.6F);
+        Quaternionf leftRot = armRotation(new Vector3f(0.25F, 0.55F, -1.0F), new Vector3f(0.0F, 0.45F, 1.0F));
         Vector3f leftWristLocal = new Vector3f(parts.centreX() / 16.0F, WatchModel.WRIST_Y / 16.0F, 0.0F);
         Vector3f leftOrigin = new Vector3f(wrist).sub(leftRot.transform(new Vector3f(leftWristLocal)));
 
@@ -368,7 +369,7 @@ public final class Hologram {
         side.sub(new Vector3f(dialAxis).mul(side.dot(dialAxis))).normalize();
         float follow = handFollowDegrees(player, partialTick);
         new Quaternionf().fromAxisAngleDeg(dialAxis.x(), dialAxis.y(), dialAxis.z(), follow).transform(side);
-        float gripRadius = (1.5F + 2.3F) / 16.0F;                                // dial edge + half a hand
+        float gripRadius = (1.5F + 2.7F) / 16.0F;                                // dial edge + half a hand
         Vector3f fingertips = new Vector3f(dialCentre)
                 .add(new Vector3f(side).mul(gripRadius))
                 .sub(new Vector3f(dialAxis).mul(1.2F / 16.0F));

@@ -157,11 +157,13 @@ public final class WatchModel {
             face = p.topFace;
             p.housing.render(poseStack, metal, light, OverlayTexture.NO_OVERLAY);
             float lift = POP_DISTANCE * Mth.clamp(pop, 0.0F, 1.0F);
-            if (lift > 0.01F) {
-                // The stem joining the case to the popped-up dial
+            // The stem joining the case to the popped-up dial. It stops just under the dial
+            // so it never pokes through the watch face.
+            float stem = lift - 0.6F;
+            if (stem > 0.01F) {
                 poseStack.pushPose();
                 poseStack.translate(0.0F, 0.0F, CASE_FRONT_Z / 16.0F);
-                poseStack.scale(1.0F, 1.0F, lift + 0.4F);
+                poseStack.scale(1.0F, 1.0F, stem);
                 p.riser.render(poseStack, metal, light, OverlayTexture.NO_OVERLAY);
                 poseStack.popPose();
             }
