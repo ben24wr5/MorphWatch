@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "top": "morphwatch:block/watch_workbench_top",
+    "side": "morphwatch:block/watch_workbench_side",
+    "bottom": "morphwatch:block/watch_workbench_bottom"
+  }
+}

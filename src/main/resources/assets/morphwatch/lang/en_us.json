@@ -9,5 +9,7 @@
   "key.morphwatch.super_b": "Super Power B",
   "key.morphwatch.super_n": "Super Power N",
   "key.morphwatch.human": "Back to Human",
-  "itemGroup.morphwatch": "Morph Watch"
+  "itemGroup.morphwatch": "Morph Watch",
+  "item.morphwatch.recharge_crystal": "Recharge Crystal",
+  "block.morphwatch.watch_workbench": "Watch Workbench"
 }

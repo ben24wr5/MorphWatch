@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [ "TWT", "WRW", "TWT" ],
+  "key": {
+    "T": { "item": "minecraft:tnt" },
+    "W": { "item": "minecraft:red_wool" },
+    "R": { "item": "minecraft:redstone" }
+  },
+  "result": { "item": "morphwatch:recharge_crystal" }
+}
