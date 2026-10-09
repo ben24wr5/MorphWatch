@@ -39,7 +39,13 @@ public final class MorphData {
     public static final String CD3_LEN = "cd3len";
     public static final String CD4 = "cd4";              // super power N
     public static final String CD4_LEN = "cd4len";
-    public static final String CLOAK = "cloak";          // game time when Camouflage / Shadow Cloak ends
+    public static final String CLOAK = "cloak";
+    public static final String STEADY = "steady";        // game time until you can't be knocked back
+    public static final String SPIKES = "spikes";        // game time until mobs that hit you get hurt back
+
+    public static boolean active(Player player, String key) {
+        return player.level().getGameTime() < root(player).getLong(key);
+    }          // game time when Camouflage / Shadow Cloak ends
     public static final String ESCAPE = "escape";        // game time when auto-escape is ready
     public static final String SCANS = "scans";          // form id -> list of scanned mob UUIDs
     public static final String POWERS_USED = "powers";   // forms whose R power you've used

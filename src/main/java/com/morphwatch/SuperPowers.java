@@ -18,6 +18,16 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.item.PrimedTnt;
+import net.minecraft.world.entity.NeutralMob;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.animal.IronGolem;
+import net.minecraft.world.entity.animal.Wolf;
+import net.minecraft.world.entity.monster.Pillager;
+import net.minecraft.world.entity.monster.Vex;
+import net.minecraft.world.entity.monster.Vindicator;
+import net.minecraft.world.entity.monster.ZombifiedPiglin;
+import net.minecraft.world.entity.monster.piglin.AbstractPiglin;
+import net.minecraft.world.entity.raid.Raider;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.monster.Zombie;
@@ -81,7 +91,7 @@ public final class SuperPowers {
             case IRON_GOLEM -> r ? "Mega Punch" : "Iron Wall";
             case BAT -> r ? "Sonic Wave" : "Night Dash";
             case SNOW_GOLEM -> r ? "Freeze Ray" : "Snow Slide";
-            case NONE -> "";
+            default -> MobPowers.name(form, slot);
         };
     }
 
@@ -146,23 +156,7 @@ public final class SuperPowers {
                 yield true;
             }
             case ZOMBIE -> {    // Zombie Helpers: 2 zombies (3 when stronger) fight for you for 30 seconds
-                int count = s >= 1.5F ? 3 : 2;
-                for (int i = 0; i < count; i++) {
-                    Zombie z = EntityType.ZOMBIE.create(level);
-                    if (z == null) continue;
-                    double angle = p.getRandom().nextDouble() * Math.PI * 2;
-                    z.moveTo(p.getX() + Math.cos(angle) * 1.8, p.getY(), p.getZ() + Math.sin(angle) * 1.8, p.getYRot(), 0);
-                    z.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.GOLDEN_HELMET));   // no burning in the sun
-                    z.setDropChance(EquipmentSlot.HEAD, 0.0F);
-                    z.setCanPickUpLoot(false);
-                    z.addTag(HELPER_TAG);
-                    z.getPersistentData().putLong(HELPER_UNTIL, level.getGameTime() + HELPER_TICKS);
-                    z.getPersistentData().putUUID(HELPER_OWNER, p.getUUID());
-                    z.setCustomName(Component.literal(p.getName().getString() + "'s helper").withStyle(ChatFormatting.GREEN));
-                    level.addFreshEntity(z);
-                    HELPERS.add(z);
-                    level.sendParticles(ParticleTypes.POOF, z.getX(), z.getY() + 1, z.getZ(), 20, 0.3, 0.6, 0.3, 0.05);
-                }
+                spawnHelpers(p, EntityType.ZOMBIE, s >= 1.5F ? 3 : 2);
                 Abilities.sound(p, SoundEvents.ZOMBIE_AMBIENT, 0.6F);
                 yield true;
             }
@@ -265,7 +259,7 @@ public final class SuperPowers {
                 Abilities.sound(p, SoundEvents.GLASS_BREAK, 1.4F);
                 yield true;
             }
-            case NONE -> false;
+            default -> false;
         };
     }
 
@@ -396,14 +390,14 @@ public final class SuperPowers {
                 Abilities.sound(p, SoundEvents.POWDER_SNOW_STEP, 0.8F);
                 yield true;
             }
-            case NONE -> false;
+            default -> false;
         };
     }
 
     // ================================================================ cloaks, helpers, TNT
 
     /** Invisible, and mobs lose track of you until the cloak runs out (unless you hit them). */
-    private static boolean cloak(ServerPlayer p, int ticks, boolean speedy, ParticleOptions puff) {
+    static boolean cloak(ServerPlayer p, int ticks, boolean speedy, ParticleOptions puff) {
         p.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, ticks, 0, false, false));
         MorphData.root(p).putLong(MorphData.CLOAK, p.level().getGameTime() + ticks);
         for (Mob m : p.level().getEntitiesOfClass(Mob.class, p.getBoundingBox().inflate(32), m -> m.getTarget() == p)) {
@@ -412,6 +406,61 @@ public final class SuperPowers {
         p.serverLevel().sendParticles(puff, p.getX(), p.getY() + 1, p.getZ(), 40, 0.5, 0.8, 0.5, 0.05);
         Abilities.sound(p, speedy ? SoundEvents.WITHER_AMBIENT : SoundEvents.CREEPER_PRIMED, speedy ? 1.4F : 0.5F);
         return true;
+    }
+
+    /** Helpers that fight monsters for you for 30 seconds, then vanish in a puff. */
+    static void spawnHelpers(ServerPlayer p, EntityType<? extends Mob> type, int count) {
+        ServerLevel level = p.serverLevel();
+        for (int i = 0; i < count; i++) {
+            Mob m = type.create(level);
+            if (m == null) continue;
+            double angle = p.getRandom().nextDouble() * Math.PI * 2;
+            m.moveTo(p.getX() + Math.cos(angle) * 1.8, p.getY(), p.getZ() + Math.sin(angle) * 1.8, p.getYRot(), 0);
+            if (m instanceof Zombie) {
+                m.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.GOLDEN_HELMET));   // no burning in the sun
+                m.setDropChance(EquipmentSlot.HEAD, 0.0F);
+            }
+            if (m instanceof AbstractPiglin piglin) {
+                piglin.setImmuneToZombification(true);
+                hand(m, Items.GOLDEN_SWORD);
+            }
+            if (m instanceof ZombifiedPiglin) hand(m, Items.GOLDEN_SWORD);
+            if (m instanceof Pillager) hand(m, Items.CROSSBOW);
+            if (m instanceof Vindicator) hand(m, Items.IRON_AXE);
+            if (m instanceof Raider raider) raider.setCanJoinRaid(false);
+            if (m instanceof Wolf wolf) wolf.tame(p);
+            if (m instanceof IronGolem golem) golem.setPlayerCreated(true);
+            if (m instanceof Vex vex) vex.setLimitedLife(HELPER_TICKS + 40);
+            m.setCanPickUpLoot(false);
+            m.addTag(HELPER_TAG);
+            m.getPersistentData().putLong(HELPER_UNTIL, level.getGameTime() + HELPER_TICKS);
+            m.getPersistentData().putUUID(HELPER_OWNER, p.getUUID());
+            m.setCustomName(Component.literal(p.getName().getString() + "'s helper").withStyle(ChatFormatting.GREEN));
+            level.addFreshEntity(m);
+            HELPERS.add(m);
+            level.sendParticles(ParticleTypes.POOF, m.getX(), m.getY() + 1, m.getZ(), 20, 0.3, 0.6, 0.3, 0.05);
+        }
+    }
+
+    private static void hand(Mob m, net.minecraft.world.item.Item item) {
+        m.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(item));
+        m.setDropChance(EquipmentSlot.MAINHAND, 0.0F);
+    }
+
+    /** Point a helper at an enemy (angry mobs like bees need to be made angry, piglins think with a "brain"). */
+    private static void helperAttack(Mob mob, LivingEntity enemy) {
+        mob.setTarget(enemy);
+        if (mob instanceof NeutralMob neutral) {
+            neutral.setPersistentAngerTarget(enemy.getUUID());
+            neutral.startPersistentAngerTimer();
+        }
+        if (mob instanceof AbstractPiglin) {
+            mob.getBrain().setMemory(MemoryModuleType.ATTACK_TARGET, enemy);
+        }
+    }
+
+    public static boolean isHelper(Entity e) {
+        return e != null && e.getTags().contains(HELPER_TAG);
     }
 
     public static boolean isCloaked(Player p) {
@@ -471,11 +520,11 @@ public final class SuperPowers {
             if (enemy == null || !enemy.isAlive()) enemy = owner.getLastHurtByMob();
             if ((mob.getTarget() == null || !mob.getTarget().isAlive()) && enemy != null && enemy.isAlive()
                     && enemy.distanceTo(mob) < 20 && !blockTarget(mob, enemy)) {
-                mob.setTarget(enemy);
+                helperAttack(mob, enemy);
             } else if (mob.getTarget() == null) {
                 List<Mob> monsters = level.getEntitiesOfClass(Mob.class, mob.getBoundingBox().inflate(12),
                         m -> m instanceof Enemy && m.isAlive() && !m.getTags().contains(HELPER_TAG));
-                if (!monsters.isEmpty()) mob.setTarget(monsters.get(0));
+                if (!monsters.isEmpty()) helperAttack(mob, monsters.get(0));
                 else if (mob.distanceToSqr(owner) > 16) mob.getNavigation().moveTo(owner, 1.2);
             }
         }
@@ -484,7 +533,7 @@ public final class SuperPowers {
     // ================================================================ aiming helpers
 
     /** The mob you're aiming at: the one under the crosshair, or the first one along your view. */
-    private static LivingEntity lookTarget(ServerPlayer p, double range, int targetId) {
+    static LivingEntity lookTarget(ServerPlayer p, double range, int targetId) {
         Entity picked = targetId >= 0 ? p.level().getEntity(targetId) : null;
         if (picked instanceof LivingEntity living && living.isAlive() && living.distanceTo(p) <= range) return living;
 
@@ -512,7 +561,7 @@ public final class SuperPowers {
     }
 
     /** Mobs in front of you (within range, inside the cone, that you can see). */
-    private static List<LivingEntity> cone(ServerPlayer p, double range, double minDot, MorphForm excludeKin) {
+    static List<LivingEntity> cone(ServerPlayer p, double range, double minDot, MorphForm excludeKin) {
         Vec3 eye = p.getEyePosition();
         Vec3 look = p.getLookAngle();
         List<LivingEntity> out = new ArrayList<>();
@@ -526,12 +575,12 @@ public final class SuperPowers {
         return out;
     }
 
-    private static boolean noTarget(ServerPlayer p, String message) {
+    static boolean noTarget(ServerPlayer p, String message) {
         WatchActions.tell(p, message, ChatFormatting.GRAY);
         return false;
     }
 
-    private static void beam(ServerLevel level, Vec3 from, Vec3 to, ParticleOptions type, int perStep) {
+    static void beam(ServerLevel level, Vec3 from, Vec3 to, ParticleOptions type, int perStep) {
         Vec3 step = to.subtract(from);
         int steps = (int) Math.ceil(step.length() * 2);
         for (int i = 1; i <= steps; i++) {
@@ -541,7 +590,7 @@ public final class SuperPowers {
     }
 
     /** Particles along the way you're facing, for dashes. */
-    private static void trail(ServerPlayer p, ParticleOptions type, int length, int perStep) {
+    static void trail(ServerPlayer p, ParticleOptions type, int length, int perStep) {
         Vec3 look = p.getLookAngle();
         for (int i = 0; i < length; i++) {
             Vec3 at = p.position().add(look.scale(i)).add(0, 0.8, 0);

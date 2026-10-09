@@ -25,6 +25,7 @@ public final class MorphRenderCache {
             if (mob == null) return null;
             if (mob instanceof Mob m) m.setNoAi(true);
             if (mob instanceof Bat bat) bat.setResting(false);
+            if (mob instanceof net.minecraft.world.entity.monster.Slime slime) slime.setSize(2, false);
             CACHE.put(player.getUUID(), mob);
         }
         return mob;

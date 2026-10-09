@@ -19,7 +19,9 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
+import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingChangeTargetEvent;
+import net.minecraftforge.event.entity.living.LivingKnockBackEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
@@ -46,6 +48,8 @@ public final class CommonEvents {
         if (pose == Pose.SLEEPING || pose == Pose.DYING) return;
 
         EntityDimensions mob = form.type().getDimensions();
+        // Slimes and magma cubes are drawn at size 2
+        if (form == MorphForm.SLIME || form == MorphForm.MAGMA_CUBE) mob = mob.scale(0.51F);
         float width = Math.min(mob.width, PLAYER_WIDTH);
         float height = Math.min(mob.height, PLAYER_HEIGHT);
         float eye = height >= PLAYER_HEIGHT ? PLAYER_EYE : height * 0.85F;
@@ -133,6 +137,23 @@ public final class CommonEvents {
         }
     }
 
+    /** Your helpers can never hurt players (magma cubes burn whatever they touch). */
+    @SubscribeEvent
+    public static void onAttack(LivingAttackEvent event) {
+        if (event.getEntity() instanceof Player && (SuperPowers.isHelper(event.getSource().getEntity())
+                || SuperPowers.isHelper(event.getSource().getDirectEntity()))) {
+            event.setCanceled(true);
+        }
+    }
+
+    /** Stubborn, Unstoppable, Shell Close...: you can't be knocked back. */
+    @SubscribeEvent
+    public static void onKnockBack(LivingKnockBackEvent event) {
+        if (event.getEntity() instanceof Player player && MorphData.active(player, MorphData.STEADY)) {
+            event.setCanceled(true);
+        }
+    }
+
     @SubscribeEvent
     public static void onLevelTick(TickEvent.LevelTickEvent event) {
         if (event.phase == TickEvent.Phase.END && event.level instanceof ServerLevel level) {
@@ -162,6 +183,11 @@ public final class CommonEvents {
                 MobAttacks.onHit(player, form, victim, mult);
                 MobFriends.help(player, form, victim);
             }
+        }
+        // Spikes: whatever hits you gets hurt back
+        if (victim instanceof ServerPlayer player && source instanceof LivingEntity attacker && attacker != player
+                && MorphData.active(player, MorphData.SPIKES)) {
+            attacker.hurt(player.damageSources().thorns(player), 3.0F);
         }
         // Something hit you while transformed
         if (victim instanceof ServerPlayer player && source instanceof LivingEntity attacker && attacker != player) {
@@ -252,6 +278,8 @@ public final class CommonEvents {
             oldRoot.remove(MorphData.CD3);
             oldRoot.remove(MorphData.CD4);
             oldRoot.remove(MorphData.CLOAK);
+            oldRoot.remove(MorphData.STEADY);
+            oldRoot.remove(MorphData.SPIKES);
         }
         event.getEntity().getPersistentData().put(MorphData.ROOT, oldRoot);
     }

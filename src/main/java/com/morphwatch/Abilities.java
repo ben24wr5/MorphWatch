@@ -67,7 +67,7 @@ public final class Abilities {
 
         boolean charged = slot == 1 && chargeTicks >= CHARGE_TICKS;
         float s = MorphData.powerMultiplier(player, form) * (charged ? 2.0F : 1.0F);
-        boolean used = switch (slot) {
+        boolean used = MobPowers.has(form) ? MobPowers.use(player, form, slot, s, targetId) : switch (slot) {
             case 1 -> power1(player, form, s);
             case 2 -> power2(player, form, s, targetId);
             case 3 -> SuperPowers.superB(player, form, s, targetId);
@@ -201,7 +201,7 @@ public final class Abilities {
                 sound(p, SoundEvents.SNOW_GOLEM_SHOOT, 1.0F);
                 yield true;
             }
-            case NONE -> false;
+            default -> false;
         };
     }
 
@@ -311,13 +311,13 @@ public final class Abilities {
                 sound(p, SoundEvents.POWDER_SNOW_PLACE, 1.0F);
                 yield true;
             }
-            case NONE -> false;
+            default -> false;
         };
     }
 
     // ================================================================ helpers
 
-    private static boolean shootWeb(ServerPlayer p, float s) {
+    static boolean shootWeb(ServerPlayer p, float s) {
         HitResult hit = p.pick(24.0D, 1.0F, false);
         if (!(hit instanceof BlockHitResult blockHit) || hit.getType() != HitResult.Type.BLOCK) {
             WatchActions.tell(p, "Look at a block to web it", ChatFormatting.GRAY);
@@ -340,7 +340,7 @@ public final class Abilities {
         return placed;
     }
 
-    private static boolean teleportToLook(ServerPlayer p, double range) {
+    static boolean teleportToLook(ServerPlayer p, double range) {
         HitResult hit = p.pick(range, 1.0F, false);
         if (!(hit instanceof BlockHitResult blockHit) || hit.getType() != HitResult.Type.BLOCK) {
             WatchActions.tell(p, "Look at a block to teleport there", ChatFormatting.GRAY);
@@ -364,7 +364,7 @@ public final class Abilities {
         return false;
     }
 
-    private static void laySnow(ServerPlayer p, int radius) {
+    static void laySnow(ServerPlayer p, int radius) {
         Level level = p.level();
         BlockPos feet = p.blockPosition();
         BlockState snow = Blocks.SNOW.defaultBlockState();
@@ -394,7 +394,7 @@ public final class Abilities {
         p.level().playSound(null, p.getX(), p.getY(), p.getZ(), sound, SoundSource.PLAYERS, 1.0F, pitch);
     }
 
-    private static void particles(ServerPlayer p, ParticleOptions type, int count) {
+    static void particles(ServerPlayer p, ParticleOptions type, int count) {
         p.serverLevel().sendParticles(type, p.getX(), p.getY() + 0.8, p.getZ(), count, 0.6, 0.6, 0.6, 0.05);
     }
 }

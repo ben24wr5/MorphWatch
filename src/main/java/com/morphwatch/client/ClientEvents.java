@@ -339,6 +339,8 @@ public final class ClientEvents {
 
         private static int crosshairTarget(Minecraft mc) {
             Entity target = mc.crosshairPickEntity;
+            // The Ender Dragon is made of parts: aim at any part to get the dragon
+            if (target instanceof net.minecraftforge.entity.PartEntity<?> part) target = part.getParent();
             return target instanceof LivingEntity && !(target instanceof Player) ? target.getId() : -1;
         }
 
