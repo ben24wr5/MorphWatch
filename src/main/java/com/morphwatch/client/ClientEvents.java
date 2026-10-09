@@ -154,12 +154,14 @@ public final class ClientEvents {
         /** First person: with the dial up, your left arm comes up into view showing the watch and hologram. */
         @SubscribeEvent
         public static void onRenderHand(RenderHandEvent event) {
-            if (event.getHand() != InteractionHand.OFF_HAND) return;
             Minecraft mc = Minecraft.getInstance();
             if (mc.player == null || !ClientState.dialOpen || !Hologram.raisesArm(mc.player)) return;
+            // Both hands are busy with the watch: hide the normal hands and draw ours once
             event.setCanceled(true);
-            Hologram.renderFirstPerson(event.getPoseStack(), event.getMultiBufferSource(), event.getPackedLight(),
-                    mc.player, event.getPartialTick());
+            if (event.getHand() == InteractionHand.MAIN_HAND) {
+                Hologram.renderFirstPerson(event.getPoseStack(), event.getMultiBufferSource(), event.getPackedLight(),
+                        mc.player, event.getPartialTick());
+            }
         }
 
         private static void applyAnim(PoseStack poseStack, TransformAnims.Anim anim, float now) {
@@ -213,11 +215,11 @@ public final class ClientEvents {
             scrollBuffer += event.getScrollDelta();
             while (scrollBuffer >= 1.0) {
                 scrollBuffer -= 1.0;
-                Dial.turn(mc, -1);   // scroll up: previous mob (left)
+                Dial.turn(mc, 1);    // scroll up: go right (next mob)
             }
             while (scrollBuffer <= -1.0) {
                 scrollBuffer += 1.0;
-                Dial.turn(mc, 1);    // scroll down: next mob (right)
+                Dial.turn(mc, -1);   // scroll down: go left (previous mob)
             }
         }
 

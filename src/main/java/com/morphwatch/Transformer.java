@@ -120,10 +120,8 @@ public final class Transformer {
 
     /** The player turned or opened their dial (ordinal) or closed it (-1). Others see the hologram. */
     public static void setDial(ServerPlayer player, int ordinal) {
-        MorphForm form = MorphForm.byOrdinal(ordinal);
-        // 0 means the dial is up but empty (no mobs scanned yet): it shows a "?" hologram.
-        boolean open = ordinal >= 0 && MorphData.isWearing(player)
-                && (ordinal == 0 || MorphData.isUnlocked(player, form));
+        // Every mob is on the dial; locked ones show a "?" hologram (viewers check the synced scans).
+        boolean open = ordinal >= 0 && ordinal < MorphForm.values().length && MorphData.isWearing(player);
         if (open) OPEN_DIALS.put(player.getUUID(), ordinal);
         else OPEN_DIALS.remove(player.getUUID());
         ModNetwork.CHANNEL.send(PacketDistributor.TRACKING_ENTITY.with(() -> player),
@@ -148,8 +146,10 @@ public final class Transformer {
         setDial(player, -1);
         if (!MorphData.isWearing(player)) return;
         MorphForm form = MorphForm.byOrdinal(ordinal);
-        if (form == MorphForm.NONE || !MorphData.isUnlocked(player, form)) {
-            WatchActions.tell(player, "Scan a mob first: look at it and press G", ChatFormatting.YELLOW);
+        if (form == MorphForm.NONE) return;
+        if (!MorphData.isUnlocked(player, form)) {
+            WatchActions.tell(player, "That mob is locked: find it, look at it and press G to scan it",
+                    ChatFormatting.YELLOW);
             return;
         }
         begin(player, form);

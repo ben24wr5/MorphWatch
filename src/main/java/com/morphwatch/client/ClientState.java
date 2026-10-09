@@ -11,6 +11,7 @@ public final class ClientState {
 
     public static boolean dialOpen = false;
     public static int dialIndex = 0;
+    public static int dialPrevIndex = 0;
     public static long dialOpenedAt = 0;
     public static long dialChangedAt = 0;
 

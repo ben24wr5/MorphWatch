@@ -9,6 +9,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.PlayerModelPart;
 
 /**
  * Draws the Morph Watch on the player's left wrist.
@@ -33,7 +34,7 @@ public class WatchLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Ab
             // Arm hanging normally: watch with the dial on the outside of the wrist
             poseStack.pushPose();
             parent.leftArm.translateAndRotate(poseStack);
-            WatchModel.renderWatch(poseStack, buffers, packedLight, player, false, ageInTicks);
+            WatchModel.renderWatch(poseStack, buffers, packedLight, player, false, ageInTicks, 0.0F);
             poseStack.popPose();
             return;
         }
@@ -50,12 +51,13 @@ public class WatchLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Ab
         arm.xRot = Mth.lerp(rise, parent.leftArm.xRot, raisedX);
         arm.yRot = Mth.lerp(rise, parent.leftArm.yRot, parent.head.yRot * 0.5F + 0.55F);
         arm.zRot = Mth.lerp(rise, parent.leftArm.zRot, 0.0F);
-        WatchModel.renderArm(poseStack, buffers, packedLight, player, arm, spare.leftSleeve);
+        WatchModel.renderArm(poseStack, buffers, packedLight, player, arm, spare.leftSleeve, PlayerModelPart.LEFT_SLEEVE);
 
         poseStack.pushPose();
         arm.translateAndRotate(poseStack);
-        WatchModel.renderWatch(poseStack, buffers, packedLight, player, true, ageInTicks);
-        Hologram.captureDialPoint(player, WatchModel.dialPoint(poseStack, player));
+        float pop = rise;  // the dial face pops out by 1 pixel as it opens
+        WatchModel.renderWatch(poseStack, buffers, packedLight, player, true, ageInTicks, pop);
+        Hologram.captureDialPoint(player, WatchModel.dialPoint(poseStack, player, pop));
         poseStack.popPose();
     }
 }

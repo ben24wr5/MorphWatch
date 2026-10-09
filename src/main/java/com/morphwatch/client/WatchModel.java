@@ -108,11 +108,11 @@ public final class WatchModel {
      * with the player's own skin.
      */
     static void renderArm(PoseStack poseStack, MultiBufferSource buffers, int light, AbstractClientPlayer player,
-                          ModelPart arm, ModelPart sleeve) {
+                          ModelPart arm, ModelPart sleeve, PlayerModelPart sleevePart) {
         RenderType skin = RenderType.entityTranslucent(player.getSkinTextureLocation());
         arm.render(poseStack, buffers.getBuffer(skin), light, OverlayTexture.NO_OVERLAY);
         sleeve.copyFrom(arm);
-        if (player.isModelPartShown(PlayerModelPart.LEFT_SLEEVE)) {
+        if (player.isModelPartShown(sleevePart)) {
             sleeve.render(poseStack, buffers.getBuffer(skin), light, OverlayTexture.NO_OVERLAY);
         }
     }
@@ -122,10 +122,13 @@ public final class WatchModel {
      * raised = the dial faces up from the front of the wrist instead of out to the side.
      */
     static void renderWatch(PoseStack poseStack, MultiBufferSource buffers, int light, Player player,
-                            boolean raised, float ageInTicks) {
+                            boolean raised, float ageInTicks, float popOut) {
         Parts p = parts(player);
         ModelPart face = raised ? p.topFace : p.sideFace;
         p.band.render(poseStack, buffers.getBuffer(RenderType.entityCutoutNoCull(TEXTURE)), light, OverlayTexture.NO_OVERLAY);
+        // With the dial up, the face pops out of the watch a little (popOut is in pixels)
+        poseStack.pushPose();
+        if (raised && popOut > 0) poseStack.translate(0.0F, 0.0F, -popOut / 16.0F);
         face.render(poseStack, buffers.getBuffer(RenderType.entityCutoutNoCull(TEXTURE)), light, OverlayTexture.NO_OVERLAY);
 
         // Glow ring: green when the R power is ready, red while it recharges. Gently pulses.
@@ -137,12 +140,13 @@ public final class WatchModel {
         float b = ready ? 0.35F : 0.2F;
         face.render(poseStack, buffers.getBuffer(RenderType.eyes(GLOW)), light, OverlayTexture.NO_OVERLAY,
                 r * pulse, g * pulse, b * pulse, 1.0F);
+        poseStack.popPose();
     }
 
     /** The point just above the raised dial, in the current pose's space. The hologram rises from here. */
-    static Vector3f dialPoint(PoseStack poseStack, Player player) {
+    static Vector3f dialPoint(PoseStack poseStack, Player player, float popOut) {
         Parts p = parts(player);
-        Vector3f v = new Vector3f(p.centreX() / 16.0F, WRIST_Y / 16.0F, -3.4F / 16.0F);
+        Vector3f v = new Vector3f(p.centreX() / 16.0F, WRIST_Y / 16.0F, (-3.1F - popOut) / 16.0F);
         return poseStack.last().pose().transformPosition(v);
     }
 }

@@ -10,8 +10,8 @@ A gold watch with a red strap that you wear on your wrist. Scan mobs to unlock t
 |---|---|
 | **G** while looking at a mob | Scan it with a beam: unlocks it and turns you into it |
 | **G** looking anywhere else | Opens the mob menu; click a mob to transform |
-| **X** | Pop up the dial. A glowing hologram of the mob rises out of your watch |
-| **Scroll wheel** (dial up) | Turn the dial left and right through your scanned mobs |
+| **X** | Raise your arm and open the dial (press X again to close it). A hologram stands on your watch |
+| **Scroll wheel** (dial up) | Up = turn right (next mob), down = turn left (previous mob). Locked mobs show a **?** |
 | **C** | Slam the watch and transform into the mob on the dial |
 | **Sneak + G** | Back to human |
 | **R** | Mob power. **Hold R** for 1.5 seconds for a charged, double-strength power |
