@@ -179,7 +179,7 @@ public final class WatchModel {
         }
         face.render(poseStack, metal, light, OverlayTexture.NO_OVERLAY);
 
-        // Glow ring: green when the R power is ready, red while it recharges. Gently pulses.
+        // Glow ring: green when the G power is ready, red while it recharges. Gently pulses.
         long now = player.level().getGameTime();
         boolean ready = now >= MorphData.root(player).getLong(MorphData.CD1);
         float pulse = 0.75F + 0.25F * Mth.sin(ageInTicks * 0.2F);

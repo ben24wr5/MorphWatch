@@ -3,6 +3,7 @@ package com.morphwatch;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -17,6 +18,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityEvent;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.living.LivingChangeTargetEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingFallEvent;
@@ -123,6 +125,26 @@ public final class CommonEvents {
         }
     }
 
+    /** Zombie helpers never turn on you, and cloaked players can't be found. */
+    @SubscribeEvent
+    public static void onChangeTargetSuper(LivingChangeTargetEvent event) {
+        if (!event.getEntity().level().isClientSide() && SuperPowers.blockTarget(event.getEntity(), event.getNewTarget())) {
+            event.setCanceled(true);
+        }
+    }
+
+    @SubscribeEvent
+    public static void onLevelTick(TickEvent.LevelTickEvent event) {
+        if (event.phase == TickEvent.Phase.END && event.level instanceof ServerLevel level) {
+            SuperPowers.tickLevel(level);
+        }
+    }
+
+    @SubscribeEvent
+    public static void onEntityJoin(EntityJoinLevelEvent event) {
+        if (!event.getLevel().isClientSide()) SuperPowers.onJoin(event.getEntity());
+    }
+
     // ---------------------------------------------------- mob attacks + friends
 
     @SubscribeEvent
@@ -227,6 +249,9 @@ public final class CommonEvents {
             oldRoot.remove(MorphData.FLIGHT);
             oldRoot.remove(MorphData.CD1);
             oldRoot.remove(MorphData.CD2);
+            oldRoot.remove(MorphData.CD3);
+            oldRoot.remove(MorphData.CD4);
+            oldRoot.remove(MorphData.CLOAK);
         }
         event.getEntity().getPersistentData().put(MorphData.ROOT, oldRoot);
     }

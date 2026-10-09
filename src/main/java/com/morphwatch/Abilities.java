@@ -32,11 +32,12 @@ import net.minecraft.world.phys.Vec3;
 import java.util.List;
 
 /**
- * The two powers each form has: R (power 1, hold to charge) and Z (power 2).
+ * Each form has four powers. Regular: G (power 1, hold to charge) and H (power 2).
+ * Super: R and T, which live in {@link SuperPowers}.
  * "s" is the strength: 1.0 normal, x2 when charged, more with a better watch or a golden form.
  */
 public final class Abilities {
-    /** Hold R this many ticks (1.5 seconds) for a charged power. */
+    /** Hold G this many ticks (1.5 seconds) for a charged power. */
     public static final int CHARGE_TICKS = 30;
 
     private Abilities() {}
@@ -53,24 +54,41 @@ public final class Abilities {
         }
 
         CompoundTag data = MorphData.root(player);
-        String cdKey = slot == 1 ? MorphData.CD1 : MorphData.CD2;
+        String cdKey = MorphData.cdKey(slot);
+        boolean isSuper = slot >= 3;
         long now = player.level().getGameTime();
         long readyAt = data.getLong(cdKey);
         if (now < readyAt) {
             long secs = Math.max(1, (readyAt - now + 19) / 20);
-            WatchActions.tell(player, "Power recharging... " + secs + "s", ChatFormatting.YELLOW);
+            WatchActions.tell(player, (isSuper ? "Super power recharging... " : "Power recharging... ") + secs + "s",
+                    ChatFormatting.YELLOW);
             return;
         }
 
         boolean charged = slot == 1 && chargeTicks >= CHARGE_TICKS;
         float s = MorphData.powerMultiplier(player, form) * (charged ? 2.0F : 1.0F);
-        boolean used = slot == 1 ? power1(player, form, s) : power2(player, form, s, targetId);
+        boolean used = switch (slot) {
+            case 1 -> power1(player, form, s);
+            case 2 -> power2(player, form, s, targetId);
+            case 3 -> SuperPowers.superR(player, form, s, targetId);
+            default -> SuperPowers.superT(player, form, s, targetId);
+        };
         if (!used) return;
 
-        int base = slot == 1 ? form.cooldown1() : form.cooldown2();
+        int base = switch (slot) {
+            case 1 -> form.cooldown1();
+            case 2 -> form.cooldown2();
+            case 3 -> SuperPowers.R_COOLDOWN;
+            default -> SuperPowers.T_COOLDOWN;
+        };
         long cooldown = Math.max(5, Math.round(base * MorphData.cooldownMultiplier(MorphData.tier(player)) * (charged ? 1.5 : 1.0)));
         data.putLong(cdKey, now + cooldown);
-        data.putLong(slot == 1 ? MorphData.CD1_LEN : MorphData.CD2_LEN, cooldown);
+        data.putLong(MorphData.cdLenKey(slot), cooldown);
+        if (isSuper) {
+            WatchActions.tell(player, "SUPER POWER: " + SuperPowers.name(form, slot) + "!", ChatFormatting.GOLD);
+            player.serverLevel().sendParticles(ParticleTypes.ELECTRIC_SPARK, player.getX(), player.getY() + 1, player.getZ(),
+                    30, 0.5, 0.8, 0.5, 0.3);
+        }
 
         // The mob's own noise with every power
         if (form.sound() != null) sound(player, form.sound(), 1.0F);
@@ -187,7 +205,7 @@ public final class Abilities {
         };
     }
 
-    // ================================================================ Z powers
+    // ================================================================ H powers
 
     private static boolean power2(ServerPlayer p, MorphForm form, float s, int targetId) {
         Vec3 look = p.getLookAngle();

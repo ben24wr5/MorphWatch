@@ -2,11 +2,13 @@
   "item.morphwatch.morph_watch": "Morph Watch",
   "item.morphwatch.morph_watch_diamond": "Diamond Morph Watch",
   "item.morphwatch.morph_watch_netherite": "Netherite Morph Watch",
-  "key.morphwatch.ability": "Mob Power (hold to charge)",
-  "key.morphwatch.ability2": "Second Mob Power",
   "key.morphwatch.take_off": "Take Off Watch",
   "key.categories.morphwatch": "Morph Watch",
   "key.morphwatch.dial": "Pop Up Dial",
   "key.morphwatch.slam": "Transform (slam watch)",
-  "key.morphwatch.scan": "Scan Mob (look at it)"
+  "key.morphwatch.super_r": "Super Power R",
+  "key.morphwatch.super_t": "Super Power T",
+  "key.morphwatch.power_g": "Mob Power G (hold to charge)",
+  "key.morphwatch.power_h": "Mob Power H",
+  "key.morphwatch.scan_mob": "Scan Mob (look at it)"
 }

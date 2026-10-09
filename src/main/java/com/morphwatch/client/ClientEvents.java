@@ -42,12 +42,17 @@ import java.util.Deque;
 
 public final class ClientEvents {
     private static final String CATEGORY = "key.categories.morphwatch";
+    // New key names (not the old ones) so the new default keys apply even if old ones were saved
+    public static final KeyMapping SUPER_R_KEY = new KeyMapping(
+            "key.morphwatch.super_r", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_R, CATEGORY);
+    public static final KeyMapping SUPER_T_KEY = new KeyMapping(
+            "key.morphwatch.super_t", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_T, CATEGORY);
     public static final KeyMapping POWER_KEY = new KeyMapping(
-            "key.morphwatch.ability", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_R, CATEGORY);
+            "key.morphwatch.power_g", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_G, CATEGORY);
     public static final KeyMapping POWER2_KEY = new KeyMapping(
-            "key.morphwatch.ability2", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_Z, CATEGORY);
+            "key.morphwatch.power_h", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_H, CATEGORY);
     public static final KeyMapping SCAN_KEY = new KeyMapping(
-            "key.morphwatch.scan", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_V, CATEGORY);
+            "key.morphwatch.scan_mob", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_V, CATEGORY);
     public static final KeyMapping DIAL_KEY = new KeyMapping(
             "key.morphwatch.dial", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_X, CATEGORY);
     public static final KeyMapping SLAM_KEY = new KeyMapping(
@@ -61,6 +66,8 @@ public final class ClientEvents {
     public static final class ModBus {
         @SubscribeEvent
         public static void onRegisterKeys(RegisterKeyMappingsEvent event) {
+            event.register(SUPER_R_KEY);
+            event.register(SUPER_T_KEY);
             event.register(POWER_KEY);
             event.register(POWER2_KEY);
             event.register(SCAN_KEY);
@@ -89,8 +96,8 @@ public final class ClientEvents {
 
     @Mod.EventBusSubscriber(modid = MorphWatchMod.MODID, value = Dist.CLIENT)
     public static final class ForgeBus {
-        private static boolean wasReady1 = true;
-        private static boolean wasReady2 = true;
+        private static final boolean[] WAS_READY = {true, true, true, true};
+        private static boolean chatChecked = false;
         private static double scrollBuffer = 0;
         /** Whether each Pre pushed a pose that its Post must pop. */
         private static final Deque<Boolean> PUSHED = new ArrayDeque<>();
@@ -242,7 +249,20 @@ public final class ClientEvents {
                 scrollBuffer = 0;
             }
 
-            // R: tap for a normal power, hold for a charged one.
+            if (!chatChecked) {
+                chatChecked = true;
+                moveChatOffT(mc);
+            }
+
+            // R and T: super powers
+            while (SUPER_R_KEY.consumeClick()) {
+                if (inGame) send(WatchActionPacket.SUPER_R, crosshairTarget(mc));
+            }
+            while (SUPER_T_KEY.consumeClick()) {
+                if (inGame) send(WatchActionPacket.SUPER_T, crosshairTarget(mc));
+            }
+
+            // G: tap for a normal power, hold for a charged one.  H: the other power.
             boolean clicked = false;
             while (POWER_KEY.consumeClick()) clicked = true;
             if (inGame && POWER_KEY.isDown()) {
@@ -302,19 +322,47 @@ public final class ClientEvents {
         private static void readyBeep(Minecraft mc) {
             Player player = mc.player;
             if (player == null || !MorphData.isWearing(player) || MorphData.getForm(player) == MorphForm.NONE) {
-                wasReady1 = true;
-                wasReady2 = true;
+                java.util.Arrays.fill(WAS_READY, true);
                 return;
             }
             CompoundTag data = MorphData.root(player);
             long now = player.level().getGameTime();
-            boolean ready1 = now >= data.getLong(MorphData.CD1);
-            boolean ready2 = now >= data.getLong(MorphData.CD2);
-            if ((ready1 && !wasReady1) || (ready2 && !wasReady2)) {
+            boolean beep = false, superBeep = false;
+            for (int slot = 1; slot <= 4; slot++) {
+                boolean ready = now >= data.getLong(MorphData.cdKey(slot));
+                if (ready && !WAS_READY[slot - 1]) {
+                    if (slot >= 3) superBeep = true;
+                    else beep = true;
+                }
+                WAS_READY[slot - 1] = ready;
+            }
+            if (superBeep) {
+                mc.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.AMETHYST_BLOCK_CHIME, 1.2F, 1.0F));
+            } else if (beep) {
                 mc.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.EXPERIENCE_ORB_PICKUP, 2.0F, 0.6F));
             }
-            wasReady1 = ready1;
-            wasReady2 = ready2;
+        }
+
+        /**
+         * T is Minecraft's chat key. The first time the mod runs, if chat and the T super power are both
+         * on T, chat moves to Y (only once, so if you put chat back on T yourself, it stays there).
+         */
+        private static void moveChatOffT(Minecraft mc) {
+            java.nio.file.Path marker = net.minecraftforge.fml.loading.FMLPaths.CONFIGDIR.get().resolve("morphwatch-chat-moved.txt");
+            if (java.nio.file.Files.exists(marker)) return;
+            try {
+                java.nio.file.Files.writeString(marker, "Morph Watch moved chat from T to Y once. Delete this file to let it check again.\n");
+            } catch (java.io.IOException ignored) {
+            }
+            if (!mc.options.keyChat.same(SUPER_T_KEY)) return;
+            mc.options.keyChat.setKey(InputConstants.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_Y));
+            KeyMapping.resetMapping();
+            mc.options.save();
+            if (mc.player != null) {
+                mc.player.displayClientMessage(net.minecraft.network.chat.Component
+                        .literal("Morph Watch: T is now a super power, so chat moved to Y (change it in Controls)")
+                        .withStyle(net.minecraft.ChatFormatting.GOLD), false);
+            }
         }
 
         private static int crosshairTarget(Minecraft mc) {

@@ -45,7 +45,7 @@ public final class HudOverlay implements IGuiOverlay {
         CompoundTag data = MorphData.root(player);
         long now = player.level().getGameTime();
 
-        int x = 4, y = 4, w = 112, h = form == MorphForm.NONE ? 34 : 52;
+        int x = 4, y = 4, w = 112, h = form == MorphForm.NONE ? 34 : 68;
         g.fill(x, y, x + w, y + h, 0x90101010);
         g.fill(x, y, x + w, y + 1, GOLD);
         g.fill(x, y + h - 1, x + w, y + h, GOLD);
@@ -66,15 +66,18 @@ public final class HudOverlay implements IGuiOverlay {
 
         int barY = y + 28;
         if (form != MorphForm.NONE) {
-            bar(g, font, "R", x + 4, barY, w - 8, data.getLong(MorphData.CD1), data.getLong(MorphData.CD1_LEN), now);
-            bar(g, font, "Z", x + 4, barY + 8, w - 8, data.getLong(MorphData.CD2), data.getLong(MorphData.CD2_LEN), now);
-            barY += 16;
+            String[] keys = {"G", "H", "R", "T"};
+            for (int slot = 1; slot <= 4; slot++) {
+                bar(g, font, keys[slot - 1], x + 4, barY, w - 8, data.getLong(MorphData.cdKey(slot)),
+                        data.getLong(MorphData.cdLenKey(slot)), now, slot >= 3);
+                barY += 8;
+            }
         }
         // Transform cooldown (the wait between transformations)
         bar(g, font, "C", x + 4, barY, w - 8, data.getLong(Transformer.TRANSFORM_CD),
-                data.getLong(Transformer.TRANSFORM_CD_LEN), now);
+                data.getLong(Transformer.TRANSFORM_CD_LEN), now, false);
 
-        // Charge bar while holding R
+        // Charge bar while holding G
         if (ClientState.charging && ClientState.chargeTicks > 3 && form != MorphForm.NONE) {
             float c = Math.min(1.0F, ClientState.chargeTicks / (float) Abilities.CHARGE_TICKS);
             int cw = 80, cx = screenWidth / 2 - cw / 2, cy = screenHeight / 2 + 12;
@@ -84,12 +87,13 @@ public final class HudOverlay implements IGuiOverlay {
         }
     }
 
-    private static void bar(GuiGraphics g, Font font, String key, int x, int y, int w, long readyAt, long length, long now) {
-        g.drawString(font, key, x, y - 1, 0xFFFFFF);
+    private static void bar(GuiGraphics g, Font font, String key, int x, int y, int w, long readyAt, long length, long now,
+                            boolean isSuper) {
+        g.drawString(font, key, x, y - 1, isSuper ? GOLD : 0xFFFFFF);
         int bx = x + 10, bw = w - 10;
         g.fill(bx, y, bx + bw, y + 5, 0xFF303030);
         if (now >= readyAt || length <= 0) {
-            g.fill(bx, y, bx + bw, y + 5, READY);
+            g.fill(bx, y, bx + bw, y + 5, isSuper ? (0xFF000000 | GOLD) : READY);
         } else {
             float done = 1.0F - (readyAt - now) / (float) length;
             g.fill(bx, y, bx + (int) (bw * Mth.clamp(done, 0.0F, 1.0F)), y + 5, RECHARGE);

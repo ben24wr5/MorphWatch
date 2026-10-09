@@ -35,6 +35,11 @@ public final class MorphData {
     public static final String CD1_LEN = "cd1len";
     public static final String CD2 = "cd2";
     public static final String CD2_LEN = "cd2len";
+    public static final String CD3 = "cd3";              // super power R
+    public static final String CD3_LEN = "cd3len";
+    public static final String CD4 = "cd4";              // super power T
+    public static final String CD4_LEN = "cd4len";
+    public static final String CLOAK = "cloak";          // game time when Camouflage / Shadow Cloak ends
     public static final String ESCAPE = "escape";        // game time when auto-escape is ready
     public static final String SCANS = "scans";          // form id -> list of scanned mob UUIDs
     public static final String POWERS_USED = "powers";   // forms whose R power you've used
@@ -44,6 +49,15 @@ public final class MorphData {
     private static final UUID HEALTH_ID = UUID.fromString("7d1a6c52-3f0e-4a8b-9b8e-5e2f0c1d7a41");
 
     private MorphData() {}
+
+    /** Cooldown key for a power slot: 1 = G, 2 = H, 3 = R (super), 4 = T (super). */
+    public static String cdKey(int slot) {
+        return switch (slot) { case 1 -> CD1; case 2 -> CD2; case 3 -> CD3; default -> CD4; };
+    }
+
+    public static String cdLenKey(int slot) {
+        return switch (slot) { case 1 -> CD1_LEN; case 2 -> CD2_LEN; case 3 -> CD3_LEN; default -> CD4_LEN; };
+    }
 
     // ------------------------------------------------------------------ raw data
 
