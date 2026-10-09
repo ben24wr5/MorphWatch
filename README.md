@@ -194,7 +194,7 @@ All three recipes (Morph Watch, Recharge Crystal, Watch Workbench) are made in a
 
 **Watch Workbench:** a block. Right-click it and a screen opens that looks like a crafting table. Put your Morph Watch in the grid with a **dye** to change the strap colour (more than one dye mixes the colours), and/or a **gold ingot, diamond or emerald** to add that gem. Take the changed watch from the box on the right. Craft it with green wool in the corners, black wool on the sides and TNT in the centre.
 
-**Creative mode:** the **Morph Watch** tab has the watch, a fully upgraded watch, the Recharge Crystal, the Watch Workbench, everything to craft the watch, and the 3 upgrade items. Old Diamond and Netherite watches are gone; if you were wearing one, your watch keeps a diamond (and gold for netherite) instead.
+**Creative mode:** the **Morph Watch** tab has the watch, the Recharge Crystal, the Watch Workbench, everything to craft the watch, and the 3 upgrade items. Old Diamond and Netherite watches are gone; if you were wearing one, your watch keeps a diamond (and gold for netherite) instead.
 
 ## Achievements
 

@@ -52,7 +52,6 @@ public class MorphWatchMod {
             .icon(() -> new ItemStack(MORPH_WATCH.get()))
             .displayItems((params, out) -> {
                 out.accept(MORPH_WATCH.get());
-                out.accept(MorphWatchItem.withUpgrades(MorphData.ALL_UPGRADES));
                 out.accept(RECHARGE_CRYSTAL.get());
                 out.accept(WATCH_WORKBENCH_ITEM.get());
                 // To craft it
