@@ -211,7 +211,7 @@ public final class CommonEvents {
         CompoundTag data = MorphData.root(player);
         long now = player.level().getGameTime();
         if (now < data.getLong(MorphData.ESCAPE)) return;
-        data.putLong(MorphData.ESCAPE, now + MorphData.escapeCooldown(MorphData.tier(player)));
+        data.putLong(MorphData.ESCAPE, now + MorphData.escapeCooldown(player));
 
         event.setCanceled(true);
         Transformer.cancel(data);
@@ -242,6 +242,7 @@ public final class CommonEvents {
     @SubscribeEvent
     public static void onLogin(PlayerEvent.PlayerLoggedInEvent event) {
         Transformer.cancel(MorphData.root(event.getEntity()));
+        MorphData.migrateOldWatch(event.getEntity());
         resync(event.getEntity());
     }
 

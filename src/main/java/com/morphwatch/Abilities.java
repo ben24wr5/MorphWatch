@@ -81,7 +81,7 @@ public final class Abilities {
             case 3 -> SuperPowers.B_COOLDOWN;
             default -> SuperPowers.N_COOLDOWN;
         };
-        long cooldown = Math.max(5, Math.round(base * MorphData.cooldownMultiplier(MorphData.tier(player)) * (charged ? 1.5 : 1.0)));
+        long cooldown = Math.max(5, Math.round(base * MorphData.cooldownMultiplier(player) * (charged ? 1.5 : 1.0)));
         data.putLong(cdKey, now + cooldown);
         data.putLong(MorphData.cdLenKey(slot), cooldown);
         if (isSuper) {

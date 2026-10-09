@@ -21,6 +21,7 @@ public record WatchActionPacket(int action, int arg) {
     public static final int SLAM = 7;      // arg = form ordinal to slam into
     public static final int SUPER_1 = 8;   // B: arg = entity under the crosshair, or -1
     public static final int SUPER_2 = 9;   // N: arg = entity under the crosshair, or -1
+    public static final int UPGRADE = 10;  // left-click holding a gold ingot, diamond or emerald
 
     public static void encode(WatchActionPacket msg, FriendlyByteBuf buf) {
         buf.writeVarInt(msg.action);
@@ -46,6 +47,7 @@ public record WatchActionPacket(int action, int arg) {
                 case SLAM -> Transformer.slam(player, msg.arg);
                 case SUPER_1 -> Abilities.use(player, 3, 0, msg.arg);
                 case SUPER_2 -> Abilities.use(player, 4, 0, msg.arg);
+                case UPGRADE -> WatchActions.upgrade(player);
                 default -> { }
             }
         });

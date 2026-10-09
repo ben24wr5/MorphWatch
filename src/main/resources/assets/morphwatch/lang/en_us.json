@@ -1,7 +1,5 @@
 {
   "item.morphwatch.morph_watch": "Morph Watch",
-  "item.morphwatch.morph_watch_diamond": "Diamond Morph Watch",
-  "item.morphwatch.morph_watch_netherite": "Netherite Morph Watch",
   "key.morphwatch.take_off": "Take Off Watch",
   "key.categories.morphwatch": "Morph Watch",
   "key.morphwatch.dial": "Pop Up Dial",
@@ -10,5 +8,6 @@
   "key.morphwatch.scan_mob": "Scan Mob (look at it)",
   "key.morphwatch.super_b": "Super Power B",
   "key.morphwatch.super_n": "Super Power N",
-  "key.morphwatch.human": "Back to Human"
+  "key.morphwatch.human": "Back to Human",
+  "itemGroup.morphwatch": "Morph Watch"
 }

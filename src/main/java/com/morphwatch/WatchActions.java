@@ -1,6 +1,8 @@
 package com.morphwatch;
 
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.particles.ItemParticleOption;
+import net.minecraft.world.item.Items;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -19,15 +21,18 @@ public final class WatchActions {
     private WatchActions() {}
 
     /** Strap the watch in this stack onto the wrist. */
-    public static void putOn(ServerPlayer player, ItemStack stack, int tier) {
+    public static void putOn(ServerPlayer player, ItemStack stack) {
         if (MorphData.isWearing(player)) {
             tell(player, "You're already wearing a Morph Watch (press J to take it off)", ChatFormatting.YELLOW);
             return;
         }
+        int bits = MorphWatchItem.upgrades(stack);
         if (!player.getAbilities().instabuild) {
             stack.shrink(1);
         }
-        MorphData.setTier(player, tier);
+        MorphData.setTier(player, 1);
+        MorphData.setUpgrades(player, bits);
+        MorphData.applyHealth(player, MorphData.getForm(player));
         MorphData.sync(player);
         player.level().playSound(null, player.getX(), player.getY(), player.getZ(),
                 SoundEvents.ARMOR_EQUIP_GOLD, SoundSource.PLAYERS, 1.0F, 1.2F);
@@ -96,6 +101,53 @@ public final class WatchActions {
         Transformer.begin(player, MorphForm.NONE);
     }
 
+    /**
+     * Left-click while holding a gold ingot, diamond or emerald: put it into the watch.
+     * Each gem has its own bonus, and the watch shows its gems.
+     */
+    public static void upgrade(ServerPlayer player) {
+        if (!requireWatch(player)) return;
+        ItemStack held = player.getMainHandItem();
+        int bit;
+        String name;
+        String bonus;
+        ChatFormatting colour;
+        if (held.is(Items.GOLD_INGOT)) {
+            bit = MorphData.GOLD; name = "Gold"; bonus = "Everything recharges faster"; colour = ChatFormatting.GOLD;
+        } else if (held.is(Items.DIAMOND)) {
+            bit = MorphData.DIAMOND; name = "Diamond"; bonus = "Your powers are stronger"; colour = ChatFormatting.AQUA;
+        } else if (held.is(Items.EMERALD)) {
+            bit = MorphData.EMERALD; name = "Emerald"; bonus = "5 more hearts"; colour = ChatFormatting.GREEN;
+        } else {
+            tell(player, "Hold a gold ingot, a diamond or an emerald to upgrade the watch", ChatFormatting.GRAY);
+            return;
+        }
+        if (MorphData.hasUpgrade(player, bit)) {
+            tell(player, "Your watch already has " + (bit == MorphData.GOLD ? "gold" : "a " + name.toLowerCase()) + " in it",
+                    ChatFormatting.YELLOW);
+            return;
+        }
+        if (!player.getAbilities().instabuild) held.shrink(1);
+        MorphData.setUpgrades(player, MorphData.upgrades(player) | bit);
+        MorphData.applyHealth(player, MorphData.getForm(player));
+        MorphData.sync(player);
+
+        player.serverLevel().sendParticles(new ItemParticleOption(ParticleTypes.ITEM, new ItemStack(
+                        bit == MorphData.GOLD ? Items.GOLD_INGOT : bit == MorphData.DIAMOND ? Items.DIAMOND : Items.EMERALD)),
+                player.getX(), player.getY() + 1.1, player.getZ(), 20, 0.3, 0.3, 0.3, 0.08);
+        player.serverLevel().sendParticles(ParticleTypes.ELECTRIC_SPARK, player.getX(), player.getY() + 1.1, player.getZ(),
+                15, 0.3, 0.3, 0.3, 0.1);
+        player.level().playSound(null, player.getX(), player.getY(), player.getZ(),
+                SoundEvents.SMITHING_TABLE_USE, SoundSource.PLAYERS, 1.0F, 1.2F);
+        player.level().playSound(null, player.getX(), player.getY(), player.getZ(),
+                SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.6F, 1.5F);
+        tell(player, name + " upgrade! " + bonus, colour);
+        MorphAdvancements.award(player, MorphAdvancements.FIRST_UPGRADE);
+        if ((MorphData.upgrades(player) & MorphData.ALL_UPGRADES) == MorphData.ALL_UPGRADES) {
+            MorphAdvancements.award(player, MorphAdvancements.ALL_UPGRADES);
+        }
+    }
+
     /** J: back to human and the watch goes back into your inventory. */
     public static void takeOff(ServerPlayer player) {
         int tier = MorphData.tier(player);
@@ -106,9 +158,11 @@ public final class WatchActions {
             Transformer.playAnimation(player, MorphData.getForm(player), MorphForm.NONE, Transformer.MIN_ANIM_TICKS);
         }
         MorphData.setForm(player, MorphForm.NONE);
+        ItemStack watch = MorphWatchItem.withUpgrades(MorphData.upgrades(player));
         MorphData.setTier(player, 0);
+        MorphData.setUpgrades(player, 0);
+        MorphData.applyHealth(player, MorphForm.NONE);   // the emerald's hearts go with the watch
         MorphData.sync(player);
-        ItemStack watch = new ItemStack(MorphWatchMod.watchForTier(tier));
         if (!player.getInventory().add(watch)) {
             player.drop(watch, false);
         }

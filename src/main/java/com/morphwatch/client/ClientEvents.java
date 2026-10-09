@@ -229,14 +229,27 @@ public final class ClientEvents {
             }
         }
 
-        /** Left-click while the dial is up: slam the watch and transform into the mob on the dial. */
+        /**
+         * Left-click while the dial is up: slam the watch and transform into the mob on the dial.
+         * Left-click holding a gold ingot, diamond or emerald (dial down): put it into the watch.
+         */
         @SubscribeEvent
         public static void onUseKey(InputEvent.InteractionKeyMappingTriggered event) {
             Minecraft mc = Minecraft.getInstance();
-            if (!event.isAttack() || !ClientState.dialOpen || mc.screen != null || mc.player == null) return;
-            event.setCanceled(true);
-            event.setSwingHand(false);
-            Dial.slam(mc);
+            if (!event.isAttack() || mc.screen != null || mc.player == null) return;
+            if (ClientState.dialOpen) {
+                event.setCanceled(true);
+                event.setSwingHand(false);
+                Dial.slam(mc);
+                return;
+            }
+            net.minecraft.world.item.ItemStack held = mc.player.getMainHandItem();
+            if (MorphData.isWearing(mc.player) && (held.is(net.minecraft.world.item.Items.GOLD_INGOT)
+                    || held.is(net.minecraft.world.item.Items.DIAMOND) || held.is(net.minecraft.world.item.Items.EMERALD))) {
+                event.setCanceled(true);
+                event.setSwingHand(true);
+                send(WatchActionPacket.UPGRADE, 0);
+            }
         }
 
         @SubscribeEvent

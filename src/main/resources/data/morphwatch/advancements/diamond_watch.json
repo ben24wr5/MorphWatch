@@ -2,13 +2,13 @@
   "parent": "morphwatch:root",
   "display": {
     "icon": {
-      "item": "morphwatch:morph_watch_diamond"
+      "item": "minecraft:diamond"
     },
     "title": {
       "text": "Shiny Upgrade"
     },
     "description": {
-      "text": "Upgrade to a Diamond Morph Watch"
+      "text": "Put a gem into your Morph Watch (hold it and left-click)"
     },
     "frame": "goal",
     "show_toast": true,
@@ -16,17 +16,8 @@
     "hidden": false
   },
   "criteria": {
-    "has": {
-      "trigger": "minecraft:inventory_changed",
-      "conditions": {
-        "items": [
-          {
-            "items": [
-              "morphwatch:morph_watch_diamond"
-            ]
-          }
-        ]
-      }
+    "done": {
+      "trigger": "minecraft:impossible"
     }
   }
 }

@@ -2,13 +2,13 @@
   "parent": "morphwatch:diamond_watch",
   "display": {
     "icon": {
-      "item": "morphwatch:morph_watch_netherite"
+      "item": "minecraft:emerald"
     },
     "title": {
       "text": "Ultimate Watch"
     },
     "description": {
-      "text": "Upgrade to a Netherite Morph Watch"
+      "text": "Put gold, a diamond and an emerald into your Morph Watch"
     },
     "frame": "challenge",
     "show_toast": true,
@@ -16,17 +16,8 @@
     "hidden": false
   },
   "criteria": {
-    "has": {
-      "trigger": "minecraft:inventory_changed",
-      "conditions": {
-        "items": [
-          {
-            "items": [
-              "morphwatch:morph_watch_netherite"
-            ]
-          }
-        ]
-      }
+    "done": {
+      "trigger": "minecraft:impossible"
     }
   }
 }

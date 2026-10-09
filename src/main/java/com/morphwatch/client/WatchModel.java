@@ -16,6 +16,7 @@ import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -63,6 +64,7 @@ public final class WatchModel {
         final ModelPart topFace;    // dial on the front of the wrist (arm raised: it faces your eyes)
         final ModelPart housing;    // gold case on the strap that the top dial sits in
         final ModelPart riser;      // gold stem that lifts the dial out of its case
+        final ModelPart gem;        // one upgrade gem (tinted gold / diamond / emerald)
 
         Parts(boolean slim) {
             this.armWidth = slim ? 3.0F : 4.0F;
@@ -72,6 +74,7 @@ public final class WatchModel {
             this.topFace = root.getChild("top_face");
             this.housing = root.getChild("housing");
             this.riser = root.getChild("riser");
+            this.gem = root.getChild("gem");
         }
 
         /** Centre of the arm across its width, in pixels. */
@@ -105,6 +108,10 @@ public final class WatchModel {
         root.addOrReplaceChild("top_face", CubeListBuilder.create()
                         .texOffs(16, 8)
                         .addBox(-1.0F + (armWidth - 3.0F) / 2.0F, 6.5F, FACE_FRONT_Z, 3.0F, 3.0F, 1.0F),
+                PartPose.ZERO);
+        root.addOrReplaceChild("gem", CubeListBuilder.create()
+                        .texOffs(0, 24)
+                        .addBox(-0.5F, -0.5F, -0.5F, 1.0F, 1.0F, 1.0F),
                 PartPose.ZERO);
         return LayerDefinition.create(mesh, 32, 32);
     }
@@ -153,6 +160,7 @@ public final class WatchModel {
         Parts p = parts(player);
         VertexConsumer metal = buffers.getBuffer(RenderType.entityCutoutNoCull(TEXTURE));
         p.band.render(poseStack, metal, light, OverlayTexture.NO_OVERLAY);
+        renderGems(poseStack, buffers, player, p, raised);
         ModelPart face = p.sideFace;
 
         poseStack.pushPose();
@@ -189,6 +197,39 @@ public final class WatchModel {
         face.render(poseStack, buffers.getBuffer(RenderType.eyes(GLOW)), light, OverlayTexture.NO_OVERLAY,
                 r * pulse, g * pulse, b * pulse, 1.0F);
         poseStack.popPose();
+    }
+
+    private static final ResourceLocation WHITE =
+            new ResourceLocation(MorphWatchMod.MODID, "textures/misc/hologram.png");
+    private static final float[][] GEM_COLOURS = {
+            {1.0F, 0.80F, 0.15F},   // gold
+            {0.45F, 0.95F, 1.0F},   // diamond
+            {0.20F, 0.95F, 0.40F}}; // emerald
+
+    /**
+     * The upgrade gems. Arm raised: in the corners of the gold case around the dial.
+     * Arm down: in a row on the front of the strap.
+     */
+    private static void renderGems(PoseStack poseStack, MultiBufferSource buffers, Player player, Parts p, boolean raised) {
+        int bits = MorphData.upgrades(player);
+        if (bits == 0) return;
+        VertexConsumer vc = buffers.getBuffer(RenderType.entityCutoutNoCull(WHITE));
+        int[] flags = {MorphData.GOLD, MorphData.DIAMOND, MorphData.EMERALD};
+        float left = -1.0F, right = -1.0F + p.armWidth;
+        float[][] spots = raised
+                ? new float[][]{{left + 0.27F, 6.27F, CASE_FRONT_Z - 0.2F}, {right - 0.27F, 6.27F, CASE_FRONT_Z - 0.2F},
+                                {right - 0.27F, 9.73F, CASE_FRONT_Z - 0.2F}}
+                : new float[][]{{p.centreX() - 1.0F, 8.0F, -2.5F}, {p.centreX(), 8.0F, -2.5F}, {p.centreX() + 1.0F, 8.0F, -2.5F}};
+        float size = raised ? 0.5F : 0.7F;
+        for (int i = 0; i < 3; i++) {
+            if ((bits & flags[i]) == 0) continue;
+            poseStack.pushPose();
+            poseStack.translate(spots[i][0] / 16.0F, spots[i][1] / 16.0F, spots[i][2] / 16.0F);
+            poseStack.scale(size, size, 0.4F);
+            float[] c = GEM_COLOURS[i];
+            p.gem.render(poseStack, vc, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, c[0], c[1], c[2], 1.0F);
+            poseStack.popPose();
+        }
     }
 
     /** The middle of the raised dial (inside the face), in the current pose's space. */

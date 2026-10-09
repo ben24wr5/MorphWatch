@@ -51,7 +51,7 @@ public final class HudOverlay implements IGuiOverlay {
         g.fill(x, y + h - 1, x + w, y + h, GOLD);
 
         // Icon: the mob's spawn egg, or the watch when human
-        ItemStack icon = new ItemStack(MorphWatchMod.watchForTier(MorphData.tier(player)));
+        ItemStack icon = com.morphwatch.MorphWatchItem.withUpgrades(MorphData.upgrades(player));
         if (form != MorphForm.NONE) {
             SpawnEggItem egg = SpawnEggItem.byId(form.type());
             if (egg != null) icon = new ItemStack(egg);
@@ -61,8 +61,18 @@ public final class HudOverlay implements IGuiOverlay {
         boolean golden = MorphData.isGolden(player, form);
         String name = (golden ? "Golden " : "") + form.displayName().getString();
         g.drawString(font, name, x + 24, y + 5, golden ? GOLD : 0xFFFFFF);
-        g.drawString(font, MorphWatchMod.tierName(MorphData.tier(player)) + " watch  "
-                + MorphData.unlockedCount(player) + "/" + MorphForm.mobs().size(), x + 24, y + 15, 0xA0A0A0);
+        String line = "Watch  " + MorphData.unlockedCount(player) + "/" + MorphForm.mobs().size();
+        g.drawString(font, line, x + 24, y + 15, 0xA0A0A0);
+        // The gems in the watch
+        int gx = x + 24 + font.width(line) + 4;
+        int[][] gems = {{MorphData.GOLD, 0xFFFFD040}, {MorphData.DIAMOND, 0xFF60F0FF}, {MorphData.EMERALD, 0xFF40F070}};
+        for (int[] gem : gems) {
+            if (!MorphData.hasUpgrade(player, gem[0])) continue;
+            g.fill(gx, y + 15, gx + 6, y + 21, 0xFF000000);
+            g.fill(gx + 1, y + 16, gx + 5, y + 20, gem[1]);
+            g.fill(gx + 1, y + 16, gx + 3, y + 18, 0xFFFFFFFF);
+            gx += 8;
+        }
 
         int barY = y + 28;
         if (form != MorphForm.NONE) {

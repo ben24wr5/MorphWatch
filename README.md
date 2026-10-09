@@ -29,9 +29,8 @@ Press **X** and a see-through green ring pops up around your watch face, like th
 
 | Watch | Transform time | Wait before the next transform |
 |---|---|---|
-| Gold | 1 second | 3 seconds |
-| Diamond | Half a second | 2 seconds |
-| Netherite | Instant | 1 second |
+| Morph Watch | 1 second | 3 seconds |
+| With the gold upgrade | Half a second | 2 seconds |
 
 Turning back to human never has to wait.
 
@@ -73,7 +72,7 @@ Super powers are bigger than G and H and take longer to recharge: 20 seconds for
 
 **Disguise:** mobs of your kind won't attack you (as a Zombie, zombies, husks and drowned leave you alone) unless you hit them first.
 **Mob friends:** up to 6 mobs of your kind follow you and attack whatever you fight.
-**Auto-escape:** if your hearts drop below a quarter, the watch turns you human, cancels the hit and heals you. It then needs 60 seconds to recharge (45 for diamond, 30 for netherite).
+**Auto-escape:** if your hearts drop below a quarter, the watch turns you human, cancels the hit and heals you. It then needs 60 seconds to recharge (45 with the gold upgrade).
 
 ## All the other mobs
 
@@ -179,11 +178,17 @@ Scanning a mob counts toward its Golden form. Scan **10 different mobs of the sa
 
 ## Upgrades
 
-| Watch | How to make it | Bonus |
-|---|---|---|
-| Morph Watch | Red wool top and bottom middle, ender pearl in the centre, gold blocks in the other 6 slots | — |
-| Diamond Morph Watch | Morph Watch surrounded by 4 diamonds (top, bottom, left, right) | Recharges 30% faster, powers 25% stronger |
-| Netherite Morph Watch | Smithing table: netherite upgrade template + Diamond Morph Watch + netherite ingot | Recharges 55% faster, powers 50% stronger, fireproof item |
+**Crafting the watch:** red wool top and bottom middle, ender pearl in the centre, gold blocks in the other 6 slots.
+
+**Upgrading it:** while wearing the watch, hold one of these in your right hand and **left-click** to put it into the watch. Each uses up 1 item, works on its own, and they all stack. The watch shows a gem for each upgrade (in the corners of the gold case, or on the strap when your arm is down), the watch item shimmers, and the panel in the top-left shows the gems too. Upgrades stay in the watch when you take it off.
+
+| Item | Bonus |
+|---|---|
+| Gold ingot | Everything recharges 30% faster, transforms are quicker, auto-escape recharges faster |
+| Diamond | Powers 30% stronger |
+| Emerald | 5 more hearts, as a human or a mob |
+
+**Creative mode:** the **Morph Watch** tab has the watch, a fully upgraded watch, a crafting table, everything to craft the watch, and the 3 upgrade items. Old Diamond and Netherite watches are gone; if you were wearing one, your watch keeps a diamond (and gold for netherite) instead.
 
 ## Achievements
 
@@ -210,7 +215,7 @@ TLauncher loads mods from `.jar` files. This folder is the mod's source code; bu
 3. If you don't have Java 17 yet, it opens the download page. Install the `.pkg` (**aarch64** for Apple M1/M2/M3/M4 chips, **x64** for Intel), then run `BUILD-MOD.command` again.
 4. Wait for the build. The first one downloads Minecraft and Forge, so it can take about 10 minutes.
 5. When it says **DONE!**, the `.jar` is already in your mods folder (`~/Library/Application Support/minecraft/mods`), and any older Morph Watch `.jar` has been removed.
-6. Open TLauncher, choose **Forge 1.20.1** and press Play. The watches are in the creative **Tools & Utilities** tab.
+6. Open TLauncher, choose **Forge 1.20.1** and press Play. The watch is in its own **Morph Watch** creative tab.
 
 If the build fails, it shows you a file called `build-log.txt`. Send that file to Claude.
 

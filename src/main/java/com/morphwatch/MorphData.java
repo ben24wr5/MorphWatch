@@ -29,7 +29,15 @@ import java.util.UUID;
 public final class MorphData {
     public static final String ROOT = "morphwatch";
     public static final String FORM = "form";
-    public static final String TIER = "tier";            // 0 = not wearing, 1 iron, 2 diamond, 3 netherite
+    public static final String TIER = "tier";            // 0 = not wearing, 1 = wearing (2/3 = old diamond/netherite watches)
+    public static final String UPGRADES = "upgrades";    // bits: gems put into the watch
+
+    /** Watch upgrades (gems). Each has its own bonus and they all stack. */
+    public static final int GOLD = 1;       // faster recharge
+    public static final int DIAMOND = 2;    // stronger powers
+    public static final int EMERALD = 4;    // more hearts
+    public static final int ALL_UPGRADES = GOLD | DIAMOND | EMERALD;
+    public static final int EMERALD_HEALTH = 10;
     public static final String FLIGHT = "flight";
     public static final String CD1 = "cd1";              // game time when power 1 is ready
     public static final String CD1_LEN = "cd1len";
@@ -86,6 +94,27 @@ public final class MorphData {
 
     public static boolean isWearing(Player player) {
         return tier(player) > 0;
+    }
+
+    public static int upgrades(Player player) {
+        return root(player).getInt(UPGRADES);
+    }
+
+    public static boolean hasUpgrade(Player player, int bit) {
+        return (upgrades(player) & bit) != 0;
+    }
+
+    public static void setUpgrades(Player player, int bits) {
+        if (bits == 0) root(player).remove(UPGRADES);
+        else root(player).putInt(UPGRADES, bits);
+    }
+
+    /** Players who wore an old Diamond or Netherite watch get the matching gems instead. */
+    public static void migrateOldWatch(Player player) {
+        int tier = tier(player);
+        if (tier == 2) setUpgrades(player, upgrades(player) | DIAMOND);
+        if (tier == 3) setUpgrades(player, upgrades(player) | DIAMOND | GOLD);
+        if (tier > 1) setTier(player, 1);
     }
 
     public static void setTier(Player player, int tier) {
@@ -174,18 +203,19 @@ public final class MorphData {
     // -------------------------------------------------------------- multipliers
 
     /** Diamond and netherite watches recharge faster. */
-    public static double cooldownMultiplier(int tier) {
-        return switch (tier) { case 2 -> 0.7; case 3 -> 0.45; default -> 1.0; };
+    /** Gold upgrade: everything recharges faster. */
+    public static double cooldownMultiplier(Player player) {
+        return hasUpgrade(player, GOLD) ? 0.7 : 1.0;
     }
 
     /** How strong powers and mob attacks are: watch tier x golden form. */
     public static float powerMultiplier(Player player, MorphForm form) {
-        float tierMult = switch (tier(player)) { case 2 -> 1.25F; case 3 -> 1.5F; default -> 1.0F; };
+        float tierMult = hasUpgrade(player, DIAMOND) ? 1.3F : 1.0F;   // Diamond upgrade: stronger powers
         return tierMult * (isGolden(player, form) ? 1.5F : 1.0F);
     }
 
-    public static int escapeCooldown(int tier) {
-        return switch (tier) { case 2 -> 900; case 3 -> 600; default -> 1200; };
+    public static int escapeCooldown(Player player) {
+        return hasUpgrade(player, GOLD) ? 900 : 1200;
     }
 
     // ------------------------------------------------------------ transforming
@@ -236,13 +266,13 @@ public final class MorphData {
         float oldMax = player.getMaxHealth();
         float fraction = oldMax > 0 ? player.getHealth() / oldMax : 1.0F;
         maxHealth.removeModifier(HEALTH_ID);
-        if (form != MorphForm.NONE) {
-            double target = form.maxHealth() * (isGolden(player, form) ? 1.5 : 1.0);
-            double add = target - maxHealth.getBaseValue();
-            if (add != 0) {
-                maxHealth.addPermanentModifier(new AttributeModifier(HEALTH_ID, "Morph Watch health", add,
-                        AttributeModifier.Operation.ADDITION));
-            }
+        double base = maxHealth.getBaseValue();
+        double target = form != MorphForm.NONE ? form.maxHealth() * (isGolden(player, form) ? 1.5 : 1.0) : base;
+        if (isWearing(player) && hasUpgrade(player, EMERALD)) target += EMERALD_HEALTH;   // Emerald: more hearts
+        double add = target - base;
+        if (add != 0) {
+            maxHealth.addPermanentModifier(new AttributeModifier(HEALTH_ID, "Morph Watch health", add,
+                    AttributeModifier.Operation.ADDITION));
         }
         float newMax = player.getMaxHealth();
         if (newMax != oldMax) {

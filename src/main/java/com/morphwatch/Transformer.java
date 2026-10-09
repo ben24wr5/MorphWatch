@@ -6,6 +6,7 @@ import com.morphwatch.network.TransformAnimPacket;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraftforge.network.PacketDistributor;
@@ -33,13 +34,14 @@ public final class Transformer {
     private Transformer() {}
 
     /** Gold watch: 1 second to transform. Diamond: half a second. Netherite: instant. */
-    public static int delayTicks(int tier) {
-        return switch (tier) { case 2 -> 10; case 3 -> 0; default -> 20; };
+    /** Gold upgrade: transforms faster. */
+    public static int delayTicks(Player player) {
+        return MorphData.hasUpgrade(player, MorphData.GOLD) ? 10 : 20;
     }
 
     /** Wait after a transform before the next one. */
-    public static int cooldownTicks(int tier) {
-        return switch (tier) { case 2 -> 40; case 3 -> 20; default -> 60; };
+    public static int cooldownTicks(Player player) {
+        return MorphData.hasUpgrade(player, MorphData.GOLD) ? 40 : 60;
     }
 
     /**
@@ -66,8 +68,7 @@ public final class Transformer {
             return false;
         }
 
-        int tier = MorphData.tier(player);
-        int delay = delayTicks(tier);
+        int delay = delayTicks(player);
         playAnimation(player, current, target, Math.max(delay, MIN_ANIM_TICKS));
 
         // The slam
@@ -97,7 +98,7 @@ public final class Transformer {
         data.remove(PENDING);
         data.remove(PENDING_AT);
         if (target != MorphForm.NONE) {
-            int cd = cooldownTicks(MorphData.tier(player));
+            int cd = cooldownTicks(player);
             data.putLong(TRANSFORM_CD, player.level().getGameTime() + cd);
             data.putLong(TRANSFORM_CD_LEN, cd);
         }
