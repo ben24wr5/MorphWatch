@@ -25,6 +25,8 @@ import java.util.UUID;
 public final class TransformAnims {
     private static final DustParticleOptions GOLD = new DustParticleOptions(new Vector3f(1.0F, 0.78F, 0.2F), 1.0F);
     private static final DustParticleOptions GOLD_SMALL = new DustParticleOptions(new Vector3f(1.0F, 0.9F, 0.45F), 0.6F);
+    private static final DustParticleOptions GREEN = new DustParticleOptions(new Vector3f(0.35F, 1.0F, 0.2F), 1.2F);
+    private static final DustParticleOptions GREEN_SMALL = new DustParticleOptions(new Vector3f(0.7F, 1.0F, 0.5F), 0.7F);
     /** Major arpeggio for turning into a mob, the same notes falling for turning back to human. */
     private static final float[] JINGLE_UP = {0.8F, 1.0F, 1.2F, 1.6F};
     private static final float[] JINGLE_DOWN = {1.6F, 1.2F, 1.0F, 0.8F};
@@ -39,6 +41,8 @@ public final class TransformAnims {
         public final int duration;
         int lastTickHandled = -1;
         boolean burstDone = false;
+        /** Your own full transformation sequence (see TransformSequence). */
+        public boolean sequence = false;
 
         Anim(MorphForm from, MorphForm to, long startTick, int duration) {
             this.from = from;
@@ -52,14 +56,22 @@ public final class TransformAnims {
             return (now - startTick) / duration;
         }
 
+        /** How far the body has changed: 0..1 (in the sequence it changes during the "morph" part only). */
+        public float morphProgress(float now) {
+            if (!sequence) return progress(now);
+            return Mth.clamp((now - startTick - TransformSequence.MORPH_START)
+                    / (TransformSequence.MORPH_END - TransformSequence.MORPH_START), 0.0F, 1.0F);
+        }
+
         /** Old shape for the first half, new shape for the second half. */
         public MorphForm drawForm(float now) {
-            return progress(now) < 0.5F ? from : to;
+            return morphProgress(now) < 0.5F ? from : to;
         }
     }
 
     private static final Map<UUID, Anim> ANIMS = new HashMap<>();
     private static boolean cameraPulledOut = false;
+    private static CameraType savedCamera = CameraType.FIRST_PERSON;
     private static long cameraRestoreAt = -1;
     /** Your own transformation background: when it started, and when it goes away (-1 = still going). */
     private static long backgroundStart = -1000;
@@ -79,16 +91,25 @@ public final class TransformAnims {
 
     public static void start(Player player, MorphForm from, MorphForm to, int ticks) {
         long now = player.level().getGameTime();
-        ANIMS.put(player.getUUID(), new Anim(from, to, now, ticks));
-
         Minecraft mc = Minecraft.getInstance();
+        // Your own transformation into a mob plays the full sequence
+        boolean sequence = player == mc.player && to != MorphForm.NONE;
+        Anim anim = new Anim(from, to, now, sequence ? com.morphwatch.Transformer.SEQUENCE_TICKS : ticks);
+        anim.sequence = sequence;
+        ANIMS.put(player.getUUID(), anim);
+
         if (player == mc.player) {
-            if (mc.options.getCameraType() == CameraType.FIRST_PERSON) {
+            if (!cameraPulledOut) savedCamera = mc.options.getCameraType();
+            if (sequence) {
+                mc.options.setCameraType(CameraType.THIRD_PERSON_FRONT);   // facing you
+                cameraPulledOut = true;
+                TransformSequence.begin(player);
+            } else if (mc.options.getCameraType() == CameraType.FIRST_PERSON) {
                 mc.options.setCameraType(CameraType.THIRD_PERSON_BACK);
                 cameraPulledOut = true;
             }
             cameraRestoreAt = -1;
-            backgroundStart = now;
+            backgroundStart = now + (sequence ? (long) TransformSequence.GREEN_END - 4 : 0);
             backgroundEnd = -1;
         }
     }
@@ -119,7 +140,7 @@ public final class TransformAnims {
      * shape's height to the new one, with a little squeeze in the middle where the swap happens.
      */
     public static float scaleFor(Anim anim, float now) {
-        float t = Mth.clamp(anim.progress(now), 0.0F, 1.0F);
+        float t = Mth.clamp(anim.morphProgress(now), 0.0F, 1.0F);
         float height = Mth.lerp(ease(t), visualHeight(anim.from), visualHeight(anim.to));
         float squeeze = 1.0F - 0.3F * Mth.sin((float) Math.PI * t);
         float drawn = visualHeight(anim.drawForm(now));
@@ -128,7 +149,7 @@ public final class TransformAnims {
 
     /** Two full spins over the animation, fastest in the middle. */
     public static float spinDegrees(Anim anim, float now) {
-        return 720.0F * ease(anim.progress(now));
+        return 720.0F * ease(anim.morphProgress(now));
     }
 
     // ------------------------------------------------------------------ ticking
@@ -151,8 +172,9 @@ public final class TransformAnims {
                     && (player == null || MorphData.getForm(player) == anim.to || elapsed > anim.duration + 40);
             if (done) {
                 if (player == mc.player) {
-                    cameraRestoreAt = gameTime + CAMERA_HOLD_TICKS;
-                    backgroundEnd = gameTime + CAMERA_HOLD_TICKS;
+                    int hold = anim.sequence ? 1 : CAMERA_HOLD_TICKS;
+                    cameraRestoreAt = gameTime + hold;
+                    backgroundEnd = gameTime + hold;
                 }
                 it.remove();
                 continue;
@@ -167,9 +189,7 @@ public final class TransformAnims {
 
         // Put the camera back to first person once the show is over.
         if (cameraPulledOut && cameraRestoreAt >= 0 && gameTime >= cameraRestoreAt) {
-            if (mc.options.getCameraType() == CameraType.THIRD_PERSON_BACK) {
-                mc.options.setCameraType(CameraType.FIRST_PERSON);
-            }
+            mc.options.setCameraType(savedCamera);
             cameraPulledOut = false;
             cameraRestoreAt = -1;
         }
@@ -177,18 +197,22 @@ public final class TransformAnims {
 
     /** Particles and sounds for one tick of the animation. */
     private static void effects(Minecraft mc, Player player, Anim anim, int tick) {
-        float t = tick / (float) anim.duration;
+        if (anim.sequence) TransformSequence.tickSounds(mc, player, tick);
+        float t = anim.sequence ? anim.morphProgress(anim.startTick + tick) : tick / (float) anim.duration;
+        if (anim.sequence && (t <= 0.0F || t >= 1.0F)) return;   // energy only while the body changes
         double x = player.getX(), y = player.getY(), z = player.getZ();
         float height = Mth.lerp(ease(t), visualHeight(anim.from), visualHeight(anim.to));
         float width = Math.max(0.5F, player.getBbWidth());
 
-        // Gold light spiralling up from the wrist
+        // Gold light spiralling up from the wrist (green energy in your own sequence)
+        DustParticleOptions big = anim.sequence ? GREEN : GOLD;
+        DustParticleOptions small = anim.sequence ? GREEN_SMALL : GOLD_SMALL;
         for (int strand = 0; strand < 3; strand++) {
             double angle = t * Math.PI * 6 + strand * (Math.PI * 2 / 3);
             double r = width * 0.9;
             double py = y + height * Mth.clamp(t * 1.2F, 0.0F, 1.0F);
-            mc.level.addParticle(GOLD, x + Math.cos(angle) * r, py, z + Math.sin(angle) * r, 0, 0.02, 0);
-            mc.level.addParticle(GOLD_SMALL, x + Math.cos(angle + 0.4) * r * 0.7, py - 0.2, z + Math.sin(angle + 0.4) * r * 0.7,
+            mc.level.addParticle(big, x + Math.cos(angle) * r, py, z + Math.sin(angle) * r, 0, 0.02, 0);
+            mc.level.addParticle(small, x + Math.cos(angle + 0.4) * r * 0.7, py - 0.2, z + Math.sin(angle + 0.4) * r * 0.7,
                     0, 0.04, 0);
         }
 
@@ -206,11 +230,11 @@ public final class TransformAnims {
                 double a = mc.level.random.nextDouble() * Math.PI * 2;
                 double up = mc.level.random.nextDouble() * 0.3;
                 double speed = 0.15 + mc.level.random.nextDouble() * 0.2;
-                mc.level.addParticle(i % 2 == 0 ? ParticleTypes.END_ROD : GOLD, x, y + height * 0.5, z,
+                mc.level.addParticle(i % 2 == 0 ? ParticleTypes.END_ROD : big, x, y + height * 0.5, z,
                         Math.cos(a) * speed, up, Math.sin(a) * speed);
             }
             mc.level.playLocalSound(x, y + 1, z, SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.PLAYERS, 0.8F, 0.6F, false);
-            if (player == mc.player) ClientState.flash();
+            if (player == mc.player && !anim.sequence) ClientState.flash();
         }
     }
 

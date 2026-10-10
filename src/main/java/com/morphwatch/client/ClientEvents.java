@@ -217,6 +217,10 @@ public final class ClientEvents {
         /** The screen shakes when you slam the watch. */
         @SubscribeEvent
         public static void onCameraAngles(ViewportEvent.ComputeCameraAngles event) {
+            // Transformation sequence: aim at your body
+            if (TransformSequence.isPlaying()) {
+                event.setPitch(event.getPitch() + TransformSequence.pitchOffset((float) event.getPartialTick()));
+            }
             if (ClientState.shakeTicks <= 0) return;
             Minecraft mc = Minecraft.getInstance();
             if (mc.player == null) return;
@@ -225,6 +229,42 @@ public final class ClientEvents {
             float time = mc.player.tickCount + pt;
             event.setRoll(event.getRoll() + Mth.sin(time * 2.7F) * 3.0F * strength);
             event.setYaw(event.getYaw() + Mth.cos(time * 3.3F) * 1.2F * strength);
+        }
+
+        /** Transformation sequence: zoom in and out. */
+        @SubscribeEvent
+        public static void onFov(ViewportEvent.ComputeFov event) {
+            if (event.usedConfiguredFov() && TransformSequence.isPlaying()) {
+                event.setFOV(event.getFOV() * TransformSequence.fovMultiplier((float) event.getPartialTick()));
+            }
+        }
+
+        /** Transformation sequence: you stand still, looking straight ahead. */
+        @SubscribeEvent
+        public static void onRenderTick(TickEvent.RenderTickEvent event) {
+            if (event.phase == TickEvent.Phase.START) TransformSequence.lockView();
+        }
+
+        @SubscribeEvent
+        public static void onMovementInput(net.minecraftforge.client.event.MovementInputUpdateEvent event) {
+            if (!TransformSequence.isPlaying()) return;
+            var input = event.getInput();
+            input.forwardImpulse = 0.0F;
+            input.leftImpulse = 0.0F;
+            input.up = false;
+            input.down = false;
+            input.left = false;
+            input.right = false;
+            input.jumping = false;
+            input.shiftKeyDown = false;
+        }
+
+        /** Transformation sequence: hide the hotbar, hearts and so on (it's a cut-scene). */
+        @SubscribeEvent
+        public static void onGuiOverlay(net.minecraftforge.client.event.RenderGuiOverlayEvent.Pre event) {
+            if (TransformSequence.isPlaying() && !event.getOverlay().id().getNamespace().equals(MorphWatchMod.MODID)) {
+                event.setCanceled(true);
+            }
         }
 
         // ------------------------------------------------------------ input

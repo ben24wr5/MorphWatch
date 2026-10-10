@@ -27,6 +27,9 @@ public final class Transformer {
 
     /** Shortest the animation ever plays, even on a Netherite watch that transforms instantly. */
     public static final int MIN_ANIM_TICKS = 12;
+    /** Your own transformation sequence (turning into a mob) lasts this long; you can't be hurt meanwhile. */
+    public static final int SEQUENCE_TICKS = 90;
+    public static final String SEQUENCE_SHIELD = "seqshield";
 
     /** Which mob each player's open dial is showing (only while the dial is up). Server memory only. */
     private static final Map<UUID, Integer> OPEN_DIALS = new HashMap<>();
@@ -70,6 +73,7 @@ public final class Transformer {
 
         int delay = delayTicks(player);
         playAnimation(player, current, target, Math.max(delay, MIN_ANIM_TICKS));
+        if (target != MorphForm.NONE) data.putLong(SEQUENCE_SHIELD, now + SEQUENCE_TICKS);
 
         // The slam
         player.level().playSound(null, player.getX(), player.getY(), player.getZ(),

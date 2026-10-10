@@ -25,6 +25,8 @@ The panel in the top-left corner shows your mob, your watch, how many mobs you'v
 
 ## The dial and transformation
 
+**Transformation sequence:** when you turn into a mob, a short cut-scene plays (about 4½ seconds): the screen floods bright green, the camera turns round to face you and your body changes into the mob in front of the green-and-black splash background with green energy and light rays, then a black screen with a streak of light, a close-up of your new mob, the mob posing with light rays behind it, and a white flash back to the game. Nothing can hurt you and you stand still while it plays. Turning back to human is quick, with no cut-scene.
+
 Press **X** and a see-through green ring pops up around your watch face, like the Omnitrix, with glowing mob icons round the top. The mob at the top (in the brightest segment) is the one you'll turn into; locked mobs show a **?** and golden forms glow gold. Only you can see the ring; other players just see your arm come up and the dial pop out. Scroll to slide the icons round (it clicks, and the ring and dial glide slowly and smoothly; quick scrolls join into one smooth turn), then **left-click** to slam the watch. The screen shakes, a green alien-style picture fills the background behind you, gold light spirals up your body, you spin and shrink or grow into the mob, there's a flash and a jingle, and the camera pulls out so you can watch it happen.
 
 | Watch | Transform time | Wait before the next transform |

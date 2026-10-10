@@ -39,6 +39,12 @@ public final class HudOverlay implements IGuiOverlay {
             g.fill(0, 0, screenWidth, screenHeight, (alpha << 24) | 0xFFFFFF);
         }
 
+        // Transformation sequence: full-screen green flood, black screen with light streak, white flash
+        if (TransformSequence.isPlaying()) {
+            TransformSequence.renderOverlay(g, screenWidth, screenHeight, partialTick);
+            return;
+        }
+
         if (!MorphData.isWearing(player) || mc.options.hideGui) return;
         Font font = mc.font;
         MorphForm form = MorphData.getForm(player);

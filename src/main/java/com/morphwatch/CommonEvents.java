@@ -140,6 +140,12 @@ public final class CommonEvents {
     /** Your helpers can never hurt players (magma cubes burn whatever they touch). */
     @SubscribeEvent
     public static void onAttack(LivingAttackEvent event) {
+        // Nothing can hurt you while your transformation sequence plays
+        if (event.getEntity() instanceof ServerPlayer p
+                && p.level().getGameTime() < MorphData.root(p).getLong(Transformer.SEQUENCE_SHIELD)) {
+            event.setCanceled(true);
+            return;
+        }
         if (event.getEntity() instanceof Player && (SuperPowers.isHelper(event.getSource().getEntity())
                 || SuperPowers.isHelper(event.getSource().getDirectEntity()))) {
             event.setCanceled(true);
