@@ -31,7 +31,9 @@ public final class ClientPacketHandler {
     public static void handleAnim(TransformAnimPacket msg) {
         Player player = player(msg.entityId());
         if (player == null) return;
-        TransformAnims.start(player, MorphForm.byOrdinal(msg.from()), MorphForm.byOrdinal(msg.to()), msg.ticks());
+        // Negative ticks: quick animation only, no cut-scene
+        TransformAnims.start(player, MorphForm.byOrdinal(msg.from()), MorphForm.byOrdinal(msg.to()),
+                Math.abs(msg.ticks()), msg.ticks() > 0);
     }
 
     public static void handleDial(DialStatePacket msg) {

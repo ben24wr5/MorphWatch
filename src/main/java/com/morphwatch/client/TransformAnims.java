@@ -89,19 +89,24 @@ public final class TransformAnims {
         return Math.min(in, out);
     }
 
-    public static void start(Player player, MorphForm from, MorphForm to, int ticks) {
+    public static void start(Player player, MorphForm from, MorphForm to, int ticks, boolean allowSequence) {
         long now = player.level().getGameTime();
         Minecraft mc = Minecraft.getInstance();
-        // Your own transformation into a mob plays the full sequence
-        boolean sequence = player == mc.player && to != MorphForm.NONE;
-        Anim anim = new Anim(from, to, now, sequence ? com.morphwatch.Transformer.SEQUENCE_TICKS : ticks);
+        // Your own transformation plays the full cut-scene. Turning back to human starts at the green
+        // flood (as a mob you have no arm up to slam the watch).
+        boolean sequence = player == mc.player && allowSequence;
+        boolean skipSlam = sequence && to == MorphForm.NONE;
+        int skip = skipSlam ? com.morphwatch.Transformer.SEQUENCE_HUMAN_SKIP : 0;
+        Anim anim = new Anim(from, to, now - skip, sequence ? com.morphwatch.Transformer.SEQUENCE_TICKS : ticks);
         anim.sequence = sequence;
+        if (skipSlam) anim.lastTickHandled = skip - 1;
         ANIMS.put(player.getUUID(), anim);
 
         if (player == mc.player) {
             if (!cameraPulledOut) savedCamera = mc.options.getCameraType();
             if (sequence) {
-                mc.options.setCameraType(CameraType.FIRST_PERSON);   // the slam close-up first
+                // the slam close-up first (straight to facing you when turning back to human)
+                mc.options.setCameraType(skipSlam ? CameraType.THIRD_PERSON_FRONT : CameraType.FIRST_PERSON);
                 cameraPulledOut = true;
                 TransformSequence.begin(player);
             } else if (mc.options.getCameraType() == CameraType.FIRST_PERSON) {
@@ -109,7 +114,7 @@ public final class TransformAnims {
                 cameraPulledOut = true;
             }
             cameraRestoreAt = -1;
-            backgroundStart = now + (sequence ? (long) TransformSequence.GREEN_END - 4 : 0);
+            backgroundStart = now + (sequence ? (long) TransformSequence.GREEN_END - 4 - skip : 0);
             backgroundEnd = -1;
         }
     }
