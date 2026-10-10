@@ -101,7 +101,7 @@ public final class TransformAnims {
         if (player == mc.player) {
             if (!cameraPulledOut) savedCamera = mc.options.getCameraType();
             if (sequence) {
-                mc.options.setCameraType(CameraType.THIRD_PERSON_FRONT);   // facing you
+                mc.options.setCameraType(CameraType.FIRST_PERSON);   // the slam close-up first
                 cameraPulledOut = true;
                 TransformSequence.begin(player);
             } else if (mc.options.getCameraType() == CameraType.FIRST_PERSON) {
@@ -178,6 +178,11 @@ public final class TransformAnims {
                 }
                 it.remove();
                 continue;
+            }
+            // Your sequence: after the slam close-up the camera turns round to face you
+            if (anim.sequence && player == mc.player && elapsed >= TransformSequence.SLAM_END
+                    && mc.options.getCameraType() == CameraType.FIRST_PERSON) {
+                mc.options.setCameraType(CameraType.THIRD_PERSON_FRONT);
             }
             if (player == null || elapsed > anim.duration) continue;
 

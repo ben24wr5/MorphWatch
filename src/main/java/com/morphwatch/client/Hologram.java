@@ -475,6 +475,67 @@ public final class Hologram {
     }
 
     /**
+     * Transformation sequence, first part: a close-up of your watch. The arm comes up to the middle
+     * of the view, your right hand lifts and slams down on the dial, and the dial sinks into its case.
+     * t = ticks into the sequence (0..SLAM_END).
+     */
+    public static void renderSlam(PoseStack poseStack, MultiBufferSource buffers, int light,
+                                  AbstractClientPlayer player, float partialTick, float t) {
+        PlayerModel<AbstractClientPlayer> spare = WatchModel.armModel(player);
+        if (spare == null) return;
+        float now = player.level().getGameTime() + partialTick;
+        WatchModel.Parts parts = WatchModel.parts(player);
+        boolean slim = WatchModel.isSlim(player);
+        float zoom = TransformAnims.ease(Math.min(1.0F, t / 5.0F));
+
+        poseStack.pushPose();
+        poseStack.translate(0.16F * zoom, 0.30F * zoom, 0.12F * zoom);   // watch moves to the middle of the view
+
+        Vector3f wrist = new Vector3f(-0.16F, -0.36F, -0.6F);
+        Quaternionf leftRot = armRotation(new Vector3f(0.25F, 0.55F, -1.0F), new Vector3f(0.0F, 0.45F, 1.0F));
+        Vector3f leftWristLocal = new Vector3f(parts.centreX() / 16.0F, WatchModel.WRIST_Y / 16.0F, 0.0F);
+        Vector3f leftOrigin = new Vector3f(wrist).sub(leftRot.transform(new Vector3f(leftWristLocal)));
+        ModelPart leftArm = spare.leftArm;
+        resetPart(leftArm);
+        poseStack.pushPose();
+        poseStack.translate(leftOrigin.x(), leftOrigin.y(), leftOrigin.z());
+        poseStack.mulPose(leftRot);
+        WatchModel.renderArm(poseStack, buffers, light, player, leftArm, spare.leftSleeve, PlayerModelPart.LEFT_SLEEVE);
+        float hit = TransformSequence.SLAM_HIT;
+        float pop = t < hit ? 1.0F : 1.0F - TransformAnims.ease((t - hit) / 2.0F);   // the dial sinks in when it's hit
+        WatchModel.renderWatch(poseStack, buffers, light, player, true, now, pop, dialTurnDegrees(player, partialTick));
+        Vector3f dialCentre = WatchModel.dialCentre(poseStack, player, pop);
+        poseStack.popPose();
+        Vector3f dialAxis = leftRot.transform(new Vector3f(0.0F, 0.0F, -1.0F)).normalize();
+
+        // Right hand: lifts up above the dial, then slams down onto it
+        float hover;
+        if (t < 4.0F) {
+            hover = 0.06F + 0.2F * TransformAnims.ease(t / 4.0F);
+        } else if (t < hit) {
+            float s = (t - 4.0F) / (hit - 4.0F);
+            hover = 0.26F - 0.23F * s * s;                                  // speeding up as it comes down
+        } else {
+            hover = 0.03F;
+        }
+        Vector3f tips = new Vector3f(dialCentre).add(new Vector3f(dialAxis).mul(hover));
+        Vector3f shoulder = new Vector3f(dialCentre).add(0.45F, -0.55F, 0.35F);
+        Quaternionf rightRot = armRotation(new Vector3f(tips).sub(shoulder), new Vector3f(dialAxis).negate());
+        float rightCentreX = slim ? -0.5F : -1.0F;
+        Vector3f rightHandLocal = new Vector3f(rightCentreX / 16.0F, 10.0F / 16.0F, 0.0F);
+        Vector3f rightOrigin = new Vector3f(tips).sub(rightRot.transform(new Vector3f(rightHandLocal)));
+        ModelPart rightArm = spare.rightArm;
+        resetPart(rightArm);
+        poseStack.pushPose();
+        poseStack.translate(rightOrigin.x(), rightOrigin.y(), rightOrigin.z());
+        poseStack.mulPose(rightRot);
+        WatchModel.renderArm(poseStack, buffers, light, player, rightArm, spare.rightSleeve, PlayerModelPart.RIGHT_SLEEVE);
+        poseStack.popPose();
+
+        poseStack.popPose();
+    }
+
+    /**
      * Rotation that lays an arm (its +y running shoulder -> hand) along `along`, with the
      * front of the arm (-z, where the raised dial sits) facing `faceOut`.
      */

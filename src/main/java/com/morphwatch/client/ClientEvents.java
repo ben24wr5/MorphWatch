@@ -175,7 +175,18 @@ public final class ClientEvents {
         @SubscribeEvent
         public static void onRenderHand(RenderHandEvent event) {
             Minecraft mc = Minecraft.getInstance();
-            if (mc.player == null || !Hologram.raisesArm(mc.player)) return;
+            if (mc.player == null) return;
+            // Transformation sequence: close-up of your hand slamming the watch
+            float slam = TransformSequence.slamTime(event.getPartialTick());
+            if (slam >= 0.0F) {
+                event.setCanceled(true);
+                if (event.getHand() == InteractionHand.MAIN_HAND) {
+                    Hologram.renderSlam(event.getPoseStack(), event.getMultiBufferSource(), event.getPackedLight(),
+                            mc.player, event.getPartialTick(), slam);
+                }
+                return;
+            }
+            if (!Hologram.raisesArm(mc.player)) return;
             // Both hands are busy with the watch: hide the normal hands and draw ours once
             event.setCanceled(true);
             if (event.getHand() == InteractionHand.MAIN_HAND) {
@@ -209,6 +220,7 @@ public final class ClientEvents {
                 TransformBackground.render(event.getPoseStack(), event.getCamera(), event.getPartialTick());
             } else if (stage == RenderLevelStageEvent.Stage.AFTER_ENTITIES) {
                 Hologram.endEntities();
+                TransformSequence.renderEmblem(event.getPoseStack(), event.getCamera(), event.getPartialTick());
             } else if (stage == RenderLevelStageEvent.Stage.AFTER_PARTICLES) {
                 Hologram.render(event.getPoseStack(), event.getCamera(), event.getPartialTick());
             }
@@ -234,8 +246,11 @@ public final class ClientEvents {
         /** Transformation sequence: zoom in and out. */
         @SubscribeEvent
         public static void onFov(ViewportEvent.ComputeFov event) {
-            if (event.usedConfiguredFov() && TransformSequence.isPlaying()) {
+            if (!TransformSequence.isPlaying()) return;
+            if (event.usedConfiguredFov()) {
                 event.setFOV(event.getFOV() * TransformSequence.fovMultiplier((float) event.getPartialTick()));
+            } else {
+                event.setFOV(event.getFOV() * TransformSequence.handFovMultiplier((float) event.getPartialTick()));
             }
         }
 

@@ -28,7 +28,7 @@ public final class Transformer {
     /** Shortest the animation ever plays, even on a Netherite watch that transforms instantly. */
     public static final int MIN_ANIM_TICKS = 12;
     /** Your own transformation sequence (turning into a mob) lasts this long; you can't be hurt meanwhile. */
-    public static final int SEQUENCE_TICKS = 90;
+    public static final int SEQUENCE_TICKS = 102;
     public static final String SEQUENCE_SHIELD = "seqshield";
 
     /** Which mob each player's open dial is showing (only while the dial is up). Server memory only. */
