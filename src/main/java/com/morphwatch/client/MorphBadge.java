@@ -49,6 +49,8 @@ final class MorphBadge {
                        float partialTick, int flashRgb, List<float[]> points, Matrix4f toLocal) {
         float height = mob.getBbHeight();
         float bodyYaw = Mth.rotLerp(partialTick, mob.yBodyRotO, mob.yBodyRot);
+        // The Ender Dragon's model faces the opposite way to every other mob
+        if (mob instanceof net.minecraft.world.entity.boss.enderdragon.EnderDragon) bodyYaw += 180.0F;
         float r = Mth.clamp(height * 0.06F, 0.07F, 0.3F);
         float depth = r * 0.35F;
 
