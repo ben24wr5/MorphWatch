@@ -71,14 +71,28 @@ final class MorphBadge {
             maxY = Math.max(maxY, v.y);
         }
         if (maxY > minY) chestY = minY + (maxY - minY) * 0.6F;   // the model's real height
-        float band = Math.max(0.08F, (maxY - minY) * 0.12F);
-        float maxSide = Math.max(0.15F, Math.min(3.0F, mob.getBbWidth()) * 0.35F);
-        for (float[] p : points) {
-            toLocal.transformPosition(p[0], p[1], p[2], v);
-            if (Math.abs(v.y - chestY) > band) continue;
-            if (Math.abs(v.x * sx + v.z * sz) > maxSide) continue;
-            float f = v.x * fx + v.z * fz;
-            if (Float.isNaN(front) || f > front) front = f;
+        // Look at every face (4 points each) of the model: the chest is the frontmost face that
+        // covers the middle of the body at chest height.
+        int quads = points.size() / 4;
+        Vector3f q = new Vector3f();
+        for (int i = 0; i < quads; i++) {
+            float qMinY = Float.MAX_VALUE, qMaxY = -Float.MAX_VALUE;
+            float qMinS = Float.MAX_VALUE, qMaxS = -Float.MAX_VALUE, qMaxF = -Float.MAX_VALUE;
+            for (int k = 0; k < 4; k++) {
+                float[] p = points.get(i * 4 + k);
+                toLocal.transformPosition(p[0], p[1], p[2], q);
+                float side = q.x * sx + q.z * sz;
+                float fwd = q.x * fx + q.z * fz;
+                qMinY = Math.min(qMinY, q.y);
+                qMaxY = Math.max(qMaxY, q.y);
+                qMinS = Math.min(qMinS, side);
+                qMaxS = Math.max(qMaxS, side);
+                qMaxF = Math.max(qMaxF, fwd);
+            }
+            if (qMaxY > top || qMinY < -0.3F) continue;             // name tags etc.
+            if (chestY < qMinY - 0.01F || chestY > qMaxY + 0.01F) continue;   // not at chest height
+            if (qMinS > 0.02F || qMaxS < -0.02F) continue;          // doesn't cover the middle
+            if (Float.isNaN(front) || qMaxF > front) front = qMaxF;
         }
         if (Float.isNaN(front)) front = Math.min(3.0F, mob.getBbWidth()) * 0.5F;
 
