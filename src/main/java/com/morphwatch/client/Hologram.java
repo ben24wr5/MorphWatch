@@ -50,6 +50,34 @@ public final class Hologram {
     private static final int RISE_TICKS = 6;
     private static final int SWITCH_TICKS = 6;
     private static final int CLOSE_TICKS = 7;
+    /** Other players' rings slide over this many ticks per click. */
+    private static final int REMOTE_SLIDE_TICKS = 10;
+    /**
+     * Your own ring: how many slots the icons still have to slide. Each scroll click adds one, and it
+     * glides back to 0 slowly and smoothly (several quick clicks join into one smooth turn).
+     */
+    private static float ringVisual = 0.0F;
+    private static long ringLastNanos = 0L;
+    /** Seconds for the glide to cover about two thirds of the way (bigger = slower). */
+    private static final float RING_GLIDE_SECONDS = 0.16F;
+
+    /** The scroll wheel turned your dial by this many clicks. */
+    static void onLocalTurn(int steps) {
+        ringVisual = Mth.clamp(ringVisual + steps, -4.0F, 4.0F);
+    }
+
+    static void resetLocalRing() {
+        ringVisual = 0.0F;
+    }
+
+    private static float localRingSlide() {
+        long now = System.nanoTime();
+        float dt = ringLastNanos == 0L ? 0.0F : Math.min(0.1F, (now - ringLastNanos) / 1.0E9F);
+        ringLastNanos = now;
+        ringVisual *= (float) Math.exp(-dt / RING_GLIDE_SECONDS);
+        if (Math.abs(ringVisual) < 0.002F) ringVisual = 0.0F;
+        return ringVisual;
+    }
     /** Each click of the dial turns the watch face this much. */
     private static final float DEGREES_PER_CLICK = 30.0F;
     /** How big the dial display is: holograms are scaled to fit inside this (blocks). */
@@ -152,8 +180,8 @@ public final class Hologram {
     static float dialTurnDegrees(Player player, float partialTick) {
         int steps, prev;
         if (player == Minecraft.getInstance().player) {
-            steps = ClientState.dialTurnSteps;
-            prev = ClientState.dialTurnPrevSteps;
+            // Your own dial turns smoothly along with the ring's icons
+            return (ClientState.dialTurnSteps - ringVisual) * -DEGREES_PER_CLICK;
         } else {
             Remote remote = REMOTE.get(player.getUUID());
             if (remote == null) return 0.0F;
@@ -430,8 +458,9 @@ public final class Hologram {
 
     /** How far (in slots) the ring's icons still have to slide after a turn of the dial. */
     private static float ringSlide(Player player, float partialTick) {
+        if (player == Minecraft.getInstance().player) return localRingSlide();
         float now = player.level().getGameTime() + partialTick;
-        float t = (now - changedAt(player)) / SWITCH_TICKS;
+        float t = (now - changedAt(player)) / REMOTE_SLIDE_TICKS;
         if (t < 0.0F || t >= 1.0F) return 0.0F;
         int dir;
         if (player == Minecraft.getInstance().player) {

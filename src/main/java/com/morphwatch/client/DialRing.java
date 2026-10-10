@@ -91,7 +91,7 @@ final class DialRing {
         int index = Math.max(0, order.indexOf(selected));
         int n = order.size();
         float mid = (INNER + OUTER) / 2.0F;
-        for (int k = -3; k <= 3; k++) {
+        for (int k = -7; k <= 7; k++) {   // wide enough for a fast multi-click glide
             float angle = (k + slide) * SLOT_DEGREES;
             if (Math.abs(angle) > TOP_HALF - 8.0F) continue;
             MorphForm form = order.get(Math.floorMod(index + k, n));

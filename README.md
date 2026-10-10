@@ -25,7 +25,7 @@ The panel in the top-left corner shows your mob, your watch, how many mobs you'v
 
 ## The dial and transformation
 
-Press **X** and a see-through green ring pops up around your watch face, like the Omnitrix, with glowing mob icons round the top. The mob at the top (in the brightest segment) is the one you'll turn into; locked mobs show a **?** and golden forms glow gold. Friends nearby can see it too. Scroll to slide the icons round (it clicks), then **left-click** to slam the watch. The screen shakes, a green alien-style picture fills the background behind you, gold light spirals up your body, you spin and shrink or grow into the mob, there's a flash and a jingle, and the camera pulls out so you can watch it happen.
+Press **X** and a see-through green ring pops up around your watch face, like the Omnitrix, with glowing mob icons round the top. The mob at the top (in the brightest segment) is the one you'll turn into; locked mobs show a **?** and golden forms glow gold. Friends nearby can see it too. Scroll to slide the icons round (it clicks, and the ring and dial glide slowly and smoothly; quick scrolls join into one smooth turn), then **left-click** to slam the watch. The screen shakes, a green alien-style picture fills the background behind you, gold light spirals up your body, you spin and shrink or grow into the mob, there's a flash and a jingle, and the camera pulls out so you can watch it happen.
 
 | Watch | Transform time | Wait before the next transform |
 |---|---|---|

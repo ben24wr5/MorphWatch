@@ -60,6 +60,7 @@ public final class Dial {
         ClientState.dialForm = choices().get(0);
         ClientState.dialPrevForm = ClientState.dialForm;
         ClientState.dialOpen = true;
+        Hologram.resetLocalRing();
         long now = player.level().getGameTime();
         ClientState.dialOpenedAt = now;
         ClientState.dialClosedAt = -1000;
@@ -100,6 +101,7 @@ public final class Dial {
         ClientState.dialTurnPrevSteps = ClientState.dialTurnSteps;
         ClientState.dialTurnSteps += steps;
         ClientState.dialChangedAt = player.level().getGameTime();
+        Hologram.onLocalTurn(steps);
         click(steps > 0 ? 1.8F : 1.6F);
         sendDial();
     }
