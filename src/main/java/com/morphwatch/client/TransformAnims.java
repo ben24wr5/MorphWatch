@@ -43,6 +43,7 @@ public final class TransformAnims {
         boolean burstDone = false;
         /** Your own full transformation sequence (see TransformSequence). */
         public boolean sequence = false;
+        int lastBeep = Integer.MIN_VALUE;
 
         Anim(MorphForm from, MorphForm to, long startTick, int duration) {
             this.from = from;
@@ -97,7 +98,9 @@ public final class TransformAnims {
         boolean sequence = player == mc.player && allowSequence;
         boolean skipSlam = sequence && to == MorphForm.NONE;
         int skip = skipSlam ? com.morphwatch.Transformer.SEQUENCE_HUMAN_SKIP : 0;
-        Anim anim = new Anim(from, to, now - skip, sequence ? com.morphwatch.Transformer.SEQUENCE_TICKS : ticks);
+        // Back to human: first the badge on your chest flashes white and red, then the cut-scene
+        int flash = skipSlam ? com.morphwatch.Transformer.HUMAN_FLASH_TICKS : 0;
+        Anim anim = new Anim(from, to, now - skip + flash, sequence ? com.morphwatch.Transformer.SEQUENCE_TICKS : ticks);
         anim.sequence = sequence;
         if (skipSlam) anim.lastTickHandled = skip - 1;
         ANIMS.put(player.getUUID(), anim);
@@ -114,7 +117,7 @@ public final class TransformAnims {
                 cameraPulledOut = true;
             }
             cameraRestoreAt = -1;
-            backgroundStart = now + (sequence ? (long) TransformSequence.GREEN_END - 4 - skip : 0);
+            backgroundStart = sequence ? anim.startTick + (long) TransformSequence.GREEN_END - 4 : now;
             backgroundEnd = -1;
         }
     }
@@ -183,6 +186,17 @@ public final class TransformAnims {
                 }
                 it.remove();
                 continue;
+            }
+            // Back to human: beeps while the badge flashes
+            if (anim.sequence && anim.to == MorphForm.NONE && player == mc.player
+                    && elapsed < TransformSequence.SLAM_END && elapsed != anim.lastBeep) {
+                anim.lastBeep = elapsed;
+                int colour = TransformSequence.badgeFlash(anim, elapsed);
+                if (colour >= 0 && (elapsed % 3 == 0)) {
+                    mc.level.playLocalSound(player.getX(), player.getY() + 1, player.getZ(),
+                            SoundEvents.NOTE_BLOCK_PLING.value(), SoundSource.PLAYERS, 1.0F,
+                            colour == TransformSequence.RED ? 0.7F : 1.4F, false);
+                }
             }
             // Your sequence: after the slam close-up the camera turns round to face you
             if (anim.sequence && player == mc.player && elapsed >= TransformSequence.SLAM_END

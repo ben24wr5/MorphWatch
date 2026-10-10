@@ -75,10 +75,23 @@ public final class TransformSequence {
         mc.player.xRotO = 0.0F;
     }
 
+    public static final int WHITE = 0xFFFFFF;
+    public static final int RED = 0xFF2020;
+
+    /**
+     * Turning back to human starts with the badge on your chest flashing white and red.
+     * Returns the colour at time t (sequence ticks; the flash runs before the green flood), or -1.
+     */
+    public static int badgeFlash(TransformAnims.Anim anim, float t) {
+        if (anim == null || !anim.sequence || anim.to != com.morphwatch.MorphForm.NONE || t >= SLAM_END) return -1;
+        int step = Math.floorMod((int) Math.floor(t), 6);
+        return step < 3 ? WHITE : RED;
+    }
+
     /** The slam close-up: time into it (0..SLAM_END), or -1 when it isn't showing. */
     public static float slamTime(float partialTick) {
         TransformAnims.Anim anim = active();
-        if (anim == null) return -1.0F;
+        if (anim == null || anim.to == com.morphwatch.MorphForm.NONE) return -1.0F;   // no slam when turning human
         float t = time(anim, partialTick);
         return t < SLAM_END ? Math.max(0.0F, t) : -1.0F;
     }
@@ -94,7 +107,11 @@ public final class TransformSequence {
         TransformAnims.Anim anim = active();
         if (anim == null) return 1.0;
         float t = time(anim, partialTick);
-        if (t < SLAM_END) return 1.0F;
+        if (t < SLAM_END) {
+            // Back to human: zoom in on the flashing badge
+            if (anim.to == com.morphwatch.MorphForm.NONE) return Mth.lerp(ease((t + 12.0F) / 5.0F), 1.0F, 0.4F);
+            return 1.0F;
+        }
         if (t < MORPH_START) return Mth.lerp(ease((t - SLAM_END) / (MORPH_START - SLAM_END)), 1.0F, 0.75F);
         if (t < STREAK_START) return 0.75F;
         if (t < POSE_START) return 0.32F;                                   // close-up (starts behind the black screen)
@@ -108,10 +125,11 @@ public final class TransformSequence {
         Minecraft mc = Minecraft.getInstance();
         if (anim == null || mc.player == null) return 0.0F;
         float t = time(anim, partialTick);
-        if (t < SLAM_END) return 0.0F;   // first person during the slam close-up
+        if (t < SLAM_END && anim.to != com.morphwatch.MorphForm.NONE) return 0.0F;   // first person during the slam
         float now = anim.startTick + t;
         float height = Math.min(4.0F, TransformAnims.visualHeight(anim.drawForm(now)) * TransformAnims.scaleFor(anim, now));
-        float aim = t >= CLOSE_START && t < POSE_START ? height * 0.62F : height * 0.5F;   // close-up: the chest symbol
+        boolean onBadge = (t >= CLOSE_START && t < POSE_START) || t < SLAM_END;
+        float aim = onBadge ? height * 0.6F : height * 0.5F;   // close-ups: the chest symbol / flashing badge
         float eye = mc.player.getEyeHeight();
         return (float) Math.toDegrees(Math.atan2(eye - aim, 4.0));
     }

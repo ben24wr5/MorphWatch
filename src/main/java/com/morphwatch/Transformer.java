@@ -32,6 +32,8 @@ public final class Transformer {
     public static final String SEQUENCE_SHIELD = "seqshield";
     /** Turning back to human starts the cut-scene this far in (there's no watch slam: you're a mob). */
     public static final int SEQUENCE_HUMAN_SKIP = 12;
+    /** Before turning back to human, the watch badge on your chest flashes white and red for this long. */
+    public static final int HUMAN_FLASH_TICKS = 24;
 
     /** Which mob each player's open dial is showing (only while the dial is up). Server memory only. */
     private static final Map<UUID, Integer> OPEN_DIALS = new HashMap<>();
@@ -76,7 +78,8 @@ public final class Transformer {
         int delay = delayTicks(player);
         playAnimation(player, current, target, Math.max(delay, MIN_ANIM_TICKS), true);
         // Your cut-scene plays (turning back to human skips the watch-slam part); you can't be hurt meanwhile
-        data.putLong(SEQUENCE_SHIELD, now + SEQUENCE_TICKS - (target == MorphForm.NONE ? SEQUENCE_HUMAN_SKIP : 0));
+        data.putLong(SEQUENCE_SHIELD, now + SEQUENCE_TICKS
+                + (target == MorphForm.NONE ? HUMAN_FLASH_TICKS - SEQUENCE_HUMAN_SKIP : 0));
 
         // The slam
         player.level().playSound(null, player.getX(), player.getY(), player.getZ(),

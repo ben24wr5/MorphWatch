@@ -160,6 +160,12 @@ public final class ClientEvents {
             poseStack.pushPose();
             if (anim != null) applyAnim(poseStack, anim, now);
             renderer.render(mob, yaw, partialTick, poseStack, event.getMultiBufferSource(), event.getPackedLight());
+            // The small 3D watch-face badge on the mob's chest (flashing white and red before turning human)
+            int flash = TransformSequence.badgeFlash(anim, anim == null ? 0 : now - anim.startTick);
+            boolean inCutScene = anim != null && anim.sequence && flash < 0;
+            if (!inCutScene && !mob.isInvisible()) {
+                MorphBadge.render(poseStack, event.getMultiBufferSource(), event.getPackedLight(), mob, partialTick, flash);
+            }
             poseStack.popPose();
         }
 
