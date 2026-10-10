@@ -21,7 +21,7 @@ A gold watch with a red strap that you wear on your wrist. Scan any of the 77 mo
 
 Change keys in Options → Controls → Key Binds → Morph Watch.
 
-The panel in the top-left corner shows your mob, your watch, how many mobs you've scanned, and bars for when G, H, B, N and X (the next transform) are ready. The B and N bars are gold. A beep plays when a power has recharged, and a chime when a super power has.
+The panel in the top-left corner shows your mob, your watch, how many mobs you've scanned, and bars for when G, H, B and N are ready (B and N in gold), and while you're a mob a reminder that **,** turns you back into a human. A beep plays when a power has recharged, and a chime when a super power has.
 
 ## The dial and transformation
 

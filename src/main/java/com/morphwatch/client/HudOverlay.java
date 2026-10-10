@@ -45,7 +45,7 @@ public final class HudOverlay implements IGuiOverlay {
         CompoundTag data = MorphData.root(player);
         long now = player.level().getGameTime();
 
-        int x = 4, y = 4, w = 112, h = form == MorphForm.NONE ? 34 : 68;
+        int x = 4, y = 4, w = 112, h = form == MorphForm.NONE ? 28 : 68;
         g.fill(x, y, x + w, y + h, 0x90101010);
         g.fill(x, y, x + w, y + 1, GOLD);
         g.fill(x, y + h - 1, x + w, y + h, GOLD);
@@ -83,9 +83,11 @@ public final class HudOverlay implements IGuiOverlay {
                 barY += 8;
             }
         }
-        // Transform cooldown (the wait between transformations)
-        bar(g, font, "X", x + 4, barY, w - 8, data.getLong(Transformer.TRANSFORM_CD),
-                data.getLong(Transformer.TRANSFORM_CD_LEN), now, false);
+        // , (comma): back to human (only while you're a mob)
+        if (form != MorphForm.NONE) {
+            g.drawString(font, ",", x + 4, barY - 3, 0xFFFFFF);
+            g.drawString(font, "Back to human", x + 14, barY - 2, 0xA0A0A0);
+        }
 
         // Charge bar while holding G
         if (ClientState.charging && ClientState.chargeTicks > 3 && form != MorphForm.NONE) {
