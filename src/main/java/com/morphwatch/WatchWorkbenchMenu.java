@@ -1,6 +1,9 @@
 package com.morphwatch;
 
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.inventory.ClickType;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
@@ -20,11 +23,20 @@ import net.minecraft.world.item.Items;
  * The Watch Workbench screen: a 3x3 grid like a crafting table. Put your Morph Watch in with
  * dyes to change the strap colour, and/or a gold ingot, diamond or emerald to add that gem.
  * The changed watch appears on the right.
+ *
+ * While you're wearing the watch you can leave it on: put just dyes and/or gems in the grid and
+ * the watch on your wrist shows on the right; click it and the watch on your wrist changes.
  */
 public class WatchWorkbenchMenu extends AbstractContainerMenu {
     private final CraftingContainer grid = new TransientCraftingContainer(this, 3, 3);
     private final ResultContainer result = new ResultContainer();
     private final ContainerLevelAccess access;
+    private final Player player;
+    /** True when the result is the watch on your wrist (no watch in the grid). */
+    private boolean wornMode = false;
+    private int pendingStrap = -1;
+    private String pendingStrapName = null;
+    private int pendingBits = 0;
 
     /** Client side. */
     public WatchWorkbenchMenu(int id, Inventory inventory) {
@@ -34,6 +46,7 @@ public class WatchWorkbenchMenu extends AbstractContainerMenu {
     public WatchWorkbenchMenu(int id, Inventory inventory, ContainerLevelAccess access) {
         super(MorphWatchMod.WORKBENCH_MENU.get(), id);
         this.access = access;
+        this.player = inventory.player;
         addSlot(new ResultSlot(124, 35));
         for (int y = 0; y < 3; y++) {
             for (int x = 0; x < 3; x++) {
@@ -85,16 +98,57 @@ public class WatchWorkbenchMenu extends AbstractContainerMenu {
                 return ItemStack.EMPTY;
             }
         }
+        wornMode = false;
+        if (watches == 0 && MorphData.isWearing(player)) {
+            // Change the watch you're wearing
+            int oldBits = MorphData.upgrades(player);
+            if (dyes == 0 && (oldBits | addBits) == oldBits) return ItemStack.EMPTY;
+            CompoundTag root = MorphData.root(player);
+            pendingBits = oldBits | addBits;
+            pendingStrap = dyes > 0 ? mix(r, g, b, dyes) : MorphData.strapColour(player);
+            pendingStrapName = dyes > 0 ? dyeName : (root.contains(MorphData.STRAP_NAME) ? root.getString(MorphData.STRAP_NAME) : null);
+            wornMode = true;
+            ItemStack preview = MorphWatchItem.makeWatch(pendingBits, pendingStrap, pendingStrapName);
+            preview.setHoverName(net.minecraft.network.chat.Component.literal("Your Morph Watch (on your wrist)"));
+            return preview;
+        }
         if (watches != 1) return ItemStack.EMPTY;
         int oldBits = MorphWatchItem.upgrades(watch);
         if (dyes == 0 && (oldBits | addBits) == oldBits) return ItemStack.EMPTY;
         ItemStack out = watch.copyWithCount(1);
         if (addBits != 0) out.getOrCreateTag().putInt(MorphWatchItem.UPGRADES_TAG, oldBits | addBits);
         if (dyes > 0) {
-            int rgb = ((int) (r / dyes * 255) << 16) | ((int) (g / dyes * 255) << 8) | (int) (b / dyes * 255);
-            MorphWatchItem.setStrap(out, rgb, dyeName);
+            MorphWatchItem.setStrap(out, mix(r, g, b, dyes), dyeName);
         }
         return out;
+    }
+
+    private static int mix(float r, float g, float b, int dyes) {
+        return ((int) (r / dyes * 255) << 16) | ((int) (g / dyes * 255) << 8) | (int) (b / dyes * 255);
+    }
+
+    /** Clicking the result while it's the watch on your wrist: change that watch, keep nothing in hand. */
+    @Override
+    public void clicked(int slotId, int button, ClickType type, Player clicker) {
+        if (slotId == 0 && wornMode && !result.getItem(0).isEmpty()) {
+            if (clicker instanceof ServerPlayer sp && MorphData.isWearing(sp)) {
+                CompoundTag root = MorphData.root(sp);
+                root.putInt(MorphData.STRAP, pendingStrap);
+                if (pendingStrapName != null) root.putString(MorphData.STRAP_NAME, pendingStrapName);
+                MorphData.setUpgrades(sp, pendingBits);
+                MorphData.applyHealth(sp, MorphData.getForm(sp));
+                MorphData.sync(sp);
+            }
+            for (int i = 0; i < grid.getContainerSize(); i++) {
+                if (!grid.getItem(i).isEmpty()) grid.removeItem(i, 1);
+            }
+            access.execute((level, pos) -> level.playSound(null, pos, SoundEvents.SMITHING_TABLE_USE,
+                    SoundSource.BLOCKS, 1.0F, 1.2F));
+            slotsChanged(grid);
+            broadcastChanges();
+            return;
+        }
+        super.clicked(slotId, button, type, clicker);
     }
 
     @Override

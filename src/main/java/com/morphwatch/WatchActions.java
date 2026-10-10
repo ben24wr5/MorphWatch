@@ -35,9 +35,9 @@ public final class WatchActions {
         } else {
             root.remove(MorphData.STRAP_NAME);
         }
-        if (!player.getAbilities().instabuild) {
-            stack.shrink(1);
-        }
+        // Always take it out of your inventory (Creative too): there's only ever one of this watch,
+        // so whatever is done to it shows on your wrist.
+        stack.shrink(1);
         MorphData.setTier(player, 1);
         MorphData.setUpgrades(player, bits);
         MorphData.applyHealth(player, MorphData.getForm(player));
