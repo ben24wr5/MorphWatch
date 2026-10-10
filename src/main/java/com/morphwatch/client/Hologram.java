@@ -299,7 +299,7 @@ public final class Hologram {
         REMOTE.values().removeIf(r -> r.closedAt() >= 0 && gameTime - r.closedAt() > CLOSE_TICKS + 2);
         if (mc.level.getGameTime() % 3 != 0) return;
         for (Player player : mc.level.players()) {
-            if (shownForm(player) == null) continue;
+            if (shownForm(player) == null || player != mc.player) continue;   // only you see your sparkles
             boolean firstPerson = player == mc.player && mc.options.getCameraType().isFirstPerson();
             if (firstPerson) continue;
             Vec3 base = LAST_WORLD_POINT.getOrDefault(player.getUUID(), fallbackAnchor(player, 1.0F));
@@ -450,6 +450,8 @@ public final class Hologram {
 
     private static void drawRing(PoseStack poseStack, MultiBufferSource buffers, Player player, MorphForm form,
                                  float partialTick) {
+        // The ring is private: only the person wearing the watch sees it
+        if (player != Minecraft.getInstance().player) return;
         float now = player.level().getGameTime() + partialTick;
         List<MorphForm> order = player == Minecraft.getInstance().player ? Dial.choices() : MorphData.dialOrder(player);
         DialRing.draw(poseStack, buffers, player, form, order, raiseProgress(player, partialTick),
