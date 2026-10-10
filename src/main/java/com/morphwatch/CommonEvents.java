@@ -202,39 +202,6 @@ public final class CommonEvents {
         }
     }
 
-    // ---------------------------------------------------------- auto-escape
-
-    /** About to drop below a quarter of your hearts: the watch turns you human and heals you. */
-    @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void onDamage(LivingDamageEvent event) {
-        if (!(event.getEntity() instanceof ServerPlayer player)) return;
-        MorphForm form = MorphData.getForm(player);
-        if (form == MorphForm.NONE || !MorphData.isWearing(player)) return;
-        if (event.getSource().is(DamageTypeTags.BYPASSES_INVULNERABILITY)) return;
-        float after = player.getHealth() - event.getAmount();
-        if (after > player.getMaxHealth() * 0.25F) return;
-
-        CompoundTag data = MorphData.root(player);
-        long now = player.level().getGameTime();
-        if (now < data.getLong(MorphData.ESCAPE)) return;
-        data.putLong(MorphData.ESCAPE, now + MorphData.escapeCooldown(player));
-
-        event.setCanceled(true);
-        Transformer.cancel(data);
-        Transformer.playHumanSequence(player, form);
-        MorphData.setForm(player, MorphForm.NONE);
-        player.heal(6.0F);
-        player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 100, 1));
-        player.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, 200, 1));
-        player.serverLevel().sendParticles(ParticleTypes.TOTEM_OF_UNDYING, player.getX(), player.getY() + 1, player.getZ(),
-                40, 0.5, 0.8, 0.5, 0.4);
-        player.level().playSound(null, player.getX(), player.getY(), player.getZ(),
-                SoundEvents.TOTEM_USE, SoundSource.PLAYERS, 0.8F, 1.2F);
-        WatchActions.tell(player, "AUTO-ESCAPE! The watch saved you", ChatFormatting.GOLD);
-        MorphAdvancements.award(player, MorphAdvancements.CLOSE_CALL);
-        MorphData.sync(player);
-    }
-
     // ------------------------------------------------------------- syncing
 
     @SubscribeEvent

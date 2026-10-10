@@ -57,8 +57,6 @@ public final class ClientEvents {
             "key.morphwatch.dial", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_X, CATEGORY);
     public static final KeyMapping HUMAN_KEY = new KeyMapping(
             "key.morphwatch.human", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_COMMA, CATEGORY);
-    public static final KeyMapping TAKE_OFF_KEY = new KeyMapping(
-            "key.morphwatch.take_off", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_J, CATEGORY);
 
     private ClientEvents() {}
 
@@ -87,7 +85,6 @@ public final class ClientEvents {
             event.register(SCAN_KEY);
             event.register(DIAL_KEY);
             event.register(HUMAN_KEY);
-            event.register(TAKE_OFF_KEY);
         }
 
         /** Add the worn-watch layer to both player models (classic and slim arms). */
@@ -396,13 +393,6 @@ public final class ClientEvents {
             // , (comma): back to human
             while (HUMAN_KEY.consumeClick()) {
                 if (inGame) send(WatchActionPacket.HUMAN, 0);
-            }
-
-            while (TAKE_OFF_KEY.consumeClick()) {
-                if (inGame) {
-                    Dial.close(mc, true);
-                    send(WatchActionPacket.TAKE_OFF, 0);
-                }
             }
 
             readyBeep(mc);

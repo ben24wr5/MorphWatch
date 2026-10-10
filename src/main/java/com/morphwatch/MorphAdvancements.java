@@ -12,7 +12,6 @@ public final class MorphAdvancements {
     public static final String ALL_POWERS = "all_powers";
     public static final String FULLY_CHARGED = "fully_charged";
     public static final String GOLDEN_FORM = "golden_form";
-    public static final String CLOSE_CALL = "close_call";
     public static final String FIRST_UPGRADE = "diamond_watch";
     public static final String ALL_UPGRADES = "netherite_watch";
 

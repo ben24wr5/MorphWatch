@@ -93,7 +93,6 @@ public class MorphWatchItem extends Item {
         tooltip.add(Component.literal(" X: dial, scroll to pick, left-click: transform").withStyle(ChatFormatting.GRAY));
         tooltip.add(Component.literal(" B, N: super powers").withStyle(ChatFormatting.GOLD));
         tooltip.add(Component.literal(" G: power (hold to charge)   H: power").withStyle(ChatFormatting.GRAY));
-        tooltip.add(Component.literal(" J: take the watch off").withStyle(ChatFormatting.GRAY));
         tooltip.add(Component.literal("Upgrade: hold a gold ingot, diamond or emerald").withStyle(ChatFormatting.LIGHT_PURPLE));
         tooltip.add(Component.literal(" and left-click while wearing the watch").withStyle(ChatFormatting.LIGHT_PURPLE));
         tooltip.add(Component.literal("Watch Workbench: dye the strap or add gems").withStyle(ChatFormatting.DARK_GREEN));

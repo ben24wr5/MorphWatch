@@ -17,7 +17,6 @@ A gold watch with a red strap that you wear on your wrist. Scan any of the 77 mo
 | **N** | Super power N |
 | **G** | Mob power. **Hold G** for 1.5 seconds for a charged, double-strength power |
 | **H** | Second mob power |
-| **J** | Take the watch off |
 
 Change keys in Options → Controls → Key Binds → Morph Watch.
 
@@ -25,7 +24,7 @@ The panel in the top-left corner shows your mob, your watch, how many mobs you'v
 
 ## The dial and transformation
 
-**Transformation sequence:** when you turn into a mob, a short cut-scene plays (about 5 seconds): a close-up of your watch as your hand slams down on the dial and it sinks in, the screen floods bright green, the camera turns round to face you and your body changes into the mob in front of the green-and-black splash background with green energy and light rays, a black screen with a streak of light, a close-up of your new mob's chest with the gold watch symbol glowing on it, the mob posing with light rays behind it, and a white flash back to the game. Nothing can hurt you and you stand still while it plays. Turning back to human with **,** plays the cut-scene too, starting at the green flood (you have no arm up to slam the watch while you're a mob) and ending with you posing with the watch symbol on your chest. Auto-escape and taking the watch off (J) while you're a mob play it too.
+**Transformation sequence:** when you turn into a mob, a short cut-scene plays (about 5 seconds): a close-up of your watch as your hand slams down on the dial and it sinks in, the screen floods bright green, the camera turns round to face you and your body changes into the mob in front of the green-and-black splash background with green energy and light rays, a black screen with a streak of light, a close-up of your new mob's chest with the gold watch symbol glowing on it, the mob posing with light rays behind it, and a white flash back to the game. Nothing can hurt you and you stand still while it plays. Turning back to human with **,** plays the cut-scene too, starting at the green flood (you have no arm up to slam the watch while you're a mob) and ending with you posing with the watch symbol on your chest.
 
 Press **X** and a see-through green ring pops up around your watch face, like the Omnitrix, with glowing mob icons round the top. The mob at the top (in the brightest segment) is the one you'll turn into; locked mobs show a **?** and golden forms glow gold. Only you can see the ring; other players just see your arm come up and the dial pop out. Scroll to slide the icons round (it clicks, and the ring and dial glide slowly and smoothly; quick scrolls join into one smooth turn), then **left-click** to slam the watch. The screen shakes, a green alien-style picture fills the background behind you, gold light spirals up your body, you spin and shrink or grow into the mob, there's a flash and a jingle, and the camera pulls out so you can watch it happen.
 
@@ -74,7 +73,6 @@ Super powers are bigger than G and H and take longer to recharge: 20 seconds for
 
 **Disguise:** mobs of your kind won't attack you (as a Zombie, zombies, husks and drowned leave you alone) unless you hit them first.
 **Mob friends:** up to 6 mobs of your kind follow you and attack whatever you fight.
-**Auto-escape:** if your hearts drop below a quarter, the watch turns you human, cancels the hit and heals you. It then needs 60 seconds to recharge (45 with the gold upgrade).
 
 ## All the other mobs
 
@@ -184,11 +182,11 @@ Scanning a mob counts toward its Golden form. Scan **10 different mobs of the sa
 
 All three recipes (Morph Watch, Recharge Crystal, Watch Workbench) are made in a **crafting table** and show up in its green recipe book.
 
-**Upgrading it:** while wearing the watch, hold one of these in your right hand and **left-click** to put it into the watch. Each uses up 1 item, works on its own, and they all stack. The watch shows a gem for each upgrade (in the corners of the gold case, or on the strap when your arm is down), the watch item shimmers, and the panel in the top-left shows the gems too. Upgrades stay in the watch when you take it off.
+**Upgrading it:** while wearing the watch, hold one of these in your right hand and **left-click** to put it into the watch. Each uses up 1 item, works on its own, and they all stack. The watch shows a gem for each upgrade (in the corners of the gold case, or on the strap when your arm is down), the watch item shimmers, and the panel in the top-left shows the gems too.
 
 | Item | Bonus |
 |---|---|
-| Gold ingot | Everything recharges 30% faster, transforms are quicker, auto-escape recharges faster |
+| Gold ingot | Everything recharges 30% faster, transforms are quicker |
 | Diamond | Powers 30% stronger |
 | Emerald | 5 more hearts, as a human or a mob |
 
@@ -200,7 +198,7 @@ All three recipes (Morph Watch, Recharge Crystal, Watch Workbench) are made in a
 
 ## Achievements
 
-Open Advancements (L) and find the **Morph Watch** tab. Mob Encyclopedia now means scanning all 77 mobs. It has: DNA Collector, Mob Encyclopedia, Gold Standard, Power Up, Fully Charged, Master of Powers, Close Call, Shiny Upgrade and Ultimate Watch.
+Open Advancements (L) and find the **Morph Watch** tab. Mob Encyclopedia now means scanning all 77 mobs. It has: DNA Collector, Mob Encyclopedia, Gold Standard, Power Up, Fully Charged, Master of Powers, Shiny Upgrade and Ultimate Watch.
 
 Your watch, scans and achievements stay with you when you die. Your form resets to human.
 
