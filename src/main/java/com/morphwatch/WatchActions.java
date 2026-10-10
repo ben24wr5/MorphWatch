@@ -163,7 +163,7 @@ public final class WatchActions {
         Transformer.cancel(MorphData.root(player));
         Transformer.setDial(player, -1);
         if (MorphData.getForm(player) != MorphForm.NONE) {
-            Transformer.playAnimation(player, MorphData.getForm(player), MorphForm.NONE, Transformer.MIN_ANIM_TICKS);
+            Transformer.playHumanSequence(player, MorphData.getForm(player));
         }
         MorphData.setForm(player, MorphForm.NONE);
         CompoundTag root = MorphData.root(player);

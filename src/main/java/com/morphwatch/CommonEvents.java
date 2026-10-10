@@ -221,7 +221,7 @@ public final class CommonEvents {
 
         event.setCanceled(true);
         Transformer.cancel(data);
-        Transformer.playAnimation(player, form, MorphForm.NONE, Transformer.MIN_ANIM_TICKS);
+        Transformer.playHumanSequence(player, form);
         MorphData.setForm(player, MorphForm.NONE);
         player.heal(6.0F);
         player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 100, 1));
