@@ -11,6 +11,10 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
+
+import java.util.List;
 
 /**
  * The small 3D watch-face badge every transformed mob wears on its chest: a little gold disc with
@@ -31,18 +35,54 @@ final class MorphBadge {
      * Draws the badge on the mob's chest. The pose is at the mob's feet.
      * flashRgb = -1 for the normal watch face, otherwise the whole badge glows this colour.
      */
+    /** Wraps the buffers so we can see where the mob's model was actually drawn. */
+    static MultiBufferSource capture(MultiBufferSource buffers, List<float[]> points) {
+        return type -> new CapturingVertexConsumer(buffers.getBuffer(type), points);
+    }
+
+    /**
+     * toLocal = undoes the pose the mob was drawn with (so captured points become blocks from its feet).
+     * The badge sits right on the front of the model at chest height: we look for the frontmost part
+     * of the model there, near the middle.
+     */
     static void render(PoseStack poseStack, MultiBufferSource buffers, int light, LivingEntity mob,
-                       float partialTick, int flashRgb) {
+                       float partialTick, int flashRgb, List<float[]> points, Matrix4f toLocal) {
         float height = mob.getBbHeight();
-        float width = Math.min(3.0F, mob.getBbWidth());
         float bodyYaw = Mth.rotLerp(partialTick, mob.yBodyRotO, mob.yBodyRot);
         float r = Mth.clamp(height * 0.06F, 0.07F, 0.3F);
         float depth = r * 0.35F;
 
+        // Where the chest is: the model's front surface around 60% of its height
+        double yawRad = Math.toRadians(bodyYaw);
+        float fx = (float) -Math.sin(yawRad), fz = (float) Math.cos(yawRad);    // forward
+        float sx = (float) Math.cos(yawRad), sz = (float) Math.sin(yawRad);     // sideways
+        float chestY = height * 0.6F;
+        float front = Float.NaN;
+        float minY = Float.MAX_VALUE, maxY = -Float.MAX_VALUE;
+        Vector3f v = new Vector3f();
+        float top = height * 1.15F + 0.1F;   // ignore name tags floating above the head
+        for (float[] p : points) {
+            toLocal.transformPosition(p[0], p[1], p[2], v);
+            if (v.y > top || v.y < -0.3F) continue;
+            minY = Math.min(minY, v.y);
+            maxY = Math.max(maxY, v.y);
+        }
+        if (maxY > minY) chestY = minY + (maxY - minY) * 0.6F;   // the model's real height
+        float band = Math.max(0.08F, (maxY - minY) * 0.12F);
+        float maxSide = Math.max(0.15F, Math.min(3.0F, mob.getBbWidth()) * 0.35F);
+        for (float[] p : points) {
+            toLocal.transformPosition(p[0], p[1], p[2], v);
+            if (Math.abs(v.y - chestY) > band) continue;
+            if (Math.abs(v.x * sx + v.z * sz) > maxSide) continue;
+            float f = v.x * fx + v.z * fz;
+            if (Float.isNaN(front) || f > front) front = f;
+        }
+        if (Float.isNaN(front)) front = Math.min(3.0F, mob.getBbWidth()) * 0.5F;
+
         poseStack.pushPose();
-        poseStack.translate(0.0F, height * 0.6F, 0.0F);
+        poseStack.translate(0.0F, chestY, 0.0F);
         poseStack.mulPose(Axis.YP.rotationDegrees(-bodyYaw));   // +z is the way the mob faces
-        poseStack.translate(0.0F, 0.0F, width * 0.5F + 0.01F);
+        poseStack.translate(0.0F, 0.0F, front - 0.005F);
         PoseStack.Pose pose = poseStack.last();
 
         boolean flashing = flashRgb >= 0;

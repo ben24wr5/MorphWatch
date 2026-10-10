@@ -157,16 +157,21 @@ public final class ClientEvents {
             float yaw = Mth.lerp(partialTick, player.yRotO, player.getYRot());
             EntityRenderer<? super LivingEntity> renderer =
                     Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(mob);
-            poseStack.pushPose();
-            if (anim != null) applyAnim(poseStack, anim, now);
-            renderer.render(mob, yaw, partialTick, poseStack, event.getMultiBufferSource(), event.getPackedLight());
             // The small 3D watch-face badge on the mob's chest (flashing white and red before turning human)
             int flash = TransformSequence.badgeFlash(anim, anim == null ? 0 : now - anim.startTick);
-            boolean inCutScene = anim != null && anim.sequence && flash < 0;
-            if (!inCutScene && !mob.isInvisible()) {
-                MorphBadge.render(poseStack, event.getMultiBufferSource(), event.getPackedLight(), mob, partialTick, flash);
-            }
+            boolean badge = !(anim != null && anim.sequence && flash < 0) && !mob.isInvisible();
+            org.joml.Matrix4f toLocal = new org.joml.Matrix4f(poseStack.last().pose()).invert();
+            java.util.List<float[]> points = new java.util.ArrayList<>();
+            net.minecraft.client.renderer.MultiBufferSource buffers = badge
+                    ? MorphBadge.capture(event.getMultiBufferSource(), points) : event.getMultiBufferSource();
+            poseStack.pushPose();
+            if (anim != null) applyAnim(poseStack, anim, now);
+            renderer.render(mob, yaw, partialTick, poseStack, buffers, event.getPackedLight());
             poseStack.popPose();
+            if (badge) {
+                MorphBadge.render(poseStack, event.getMultiBufferSource(), event.getPackedLight(), mob, partialTick,
+                        flash, points, toLocal);
+            }
         }
 
         @SubscribeEvent
