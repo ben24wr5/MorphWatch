@@ -156,16 +156,17 @@ public final class WatchActions {
         }
     }
 
-    /** J: back to human and the watch goes back into your inventory. */
+    /** J (only as a human): the watch goes back into your inventory. */
     public static void takeOff(ServerPlayer player) {
         int tier = MorphData.tier(player);
         if (tier <= 0) return;
+        // J doesn't turn you back into a human: that's the , key
+        if (MorphData.getForm(player) != MorphForm.NONE) {
+            tell(player, "Turn back into a human first (press ,)", ChatFormatting.YELLOW);
+            return;
+        }
         Transformer.cancel(MorphData.root(player));
         Transformer.setDial(player, -1);
-        if (MorphData.getForm(player) != MorphForm.NONE) {
-            Transformer.playHumanSequence(player, MorphData.getForm(player));
-        }
-        MorphData.setForm(player, MorphForm.NONE);
         CompoundTag root = MorphData.root(player);
         ItemStack watch = MorphWatchItem.makeWatch(MorphData.upgrades(player), MorphData.strapColour(player),
                 root.contains(MorphData.STRAP_NAME) ? root.getString(MorphData.STRAP_NAME) : null);

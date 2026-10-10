@@ -13,7 +13,7 @@ A gold watch with a red strap that you wear on your wrist. Scan any of the 77 mo
 | **X** | Raise your arm and open the dial (press X again to close it). Only as a human: no dial while you're a mob |
 | **Scroll wheel** (dial up) | Up = turn right (next mob), down = turn left (previous mob). Locked mobs show a **?** |
 | **,** (comma) or **Sneak + V** | Back to human |
-| **J** | Take the watch off (only while you're wearing it). If you're a mob, you turn back into a human first, with the cut-scene |
+| **J** | Take the watch off (only while you're wearing it, and only as a human: press **,** first if you're a mob) |
 | **B** | Super power B |
 | **N** | Super power N |
 | **G** | Mob power. **Hold G** for 1.5 seconds for a charged, double-strength power |
