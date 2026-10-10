@@ -161,10 +161,7 @@ public final class WatchActions {
         int tier = MorphData.tier(player);
         if (tier <= 0) return;
         // J doesn't turn you back into a human: that's the , key
-        if (MorphData.getForm(player) != MorphForm.NONE) {
-            tell(player, "Turn back into a human first (press ,)", ChatFormatting.YELLOW);
-            return;
-        }
+        if (MorphData.getForm(player) != MorphForm.NONE) return;   // as a mob, J does nothing
         Transformer.cancel(MorphData.root(player));
         Transformer.setDial(player, -1);
         CompoundTag root = MorphData.root(player);
