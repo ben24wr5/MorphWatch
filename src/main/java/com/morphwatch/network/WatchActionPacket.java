@@ -42,6 +42,7 @@ public record WatchActionPacket(int action, int arg) {
                 case SCAN -> WatchActions.scan(player, msg.arg);
                 case SELECT -> WatchActions.select(player, msg.arg);
                 case HUMAN -> WatchActions.human(player);
+                case TAKE_OFF -> WatchActions.takeOff(player);
                 case DIAL -> Transformer.setDial(player, msg.arg);
                 case SLAM -> Transformer.slam(player, msg.arg);
                 case SUPER_1 -> Abilities.use(player, 3, 0, msg.arg);

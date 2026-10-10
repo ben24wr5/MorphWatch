@@ -119,6 +119,13 @@ public final class Transformer {
     }
 
     /** Tells everyone nearby (and the player) to play the transform animation. */
+    /** Back to human with the cut-scene (taking the watch off while you're a mob). You can't be hurt during it. */
+    public static void playHumanSequence(ServerPlayer player, MorphForm from) {
+        playAnimation(player, from, MorphForm.NONE, MIN_ANIM_TICKS, true);
+        MorphData.root(player).putLong(SEQUENCE_SHIELD,
+                player.level().getGameTime() + SEQUENCE_TICKS - SEQUENCE_HUMAN_SKIP);
+    }
+
     /** A quick animation only: no cut-scene. */
     public static void playAnimation(ServerPlayer player, MorphForm from, MorphForm to, int ticks) {
         playAnimation(player, from, to, ticks, false);

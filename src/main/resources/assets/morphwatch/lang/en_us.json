@@ -11,5 +11,6 @@
   "itemGroup.morphwatch": "Morph Watch",
   "item.morphwatch.recharge_crystal": "Recharge Crystal",
   "block.morphwatch.watch_workbench": "Watch Workbench",
-  "container.morphwatch.watch_workbench": "Watch Workbench"
+  "container.morphwatch.watch_workbench": "Watch Workbench",
+  "key.morphwatch.take_off": "Take Off Watch"
 }

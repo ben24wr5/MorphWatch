@@ -24,7 +24,7 @@ public final class WatchActions {
     /** Strap the watch in this stack onto the wrist. */
     public static void putOn(ServerPlayer player, ItemStack stack) {
         if (MorphData.isWearing(player)) {
-            tell(player, "You're already wearing a Morph Watch", ChatFormatting.YELLOW);
+            tell(player, "You're already wearing a Morph Watch (press J to take it off)", ChatFormatting.YELLOW);
             return;
         }
         int bits = MorphWatchItem.upgrades(stack);
@@ -154,6 +154,33 @@ public final class WatchActions {
         if ((MorphData.upgrades(player) & MorphData.ALL_UPGRADES) == MorphData.ALL_UPGRADES) {
             MorphAdvancements.award(player, MorphAdvancements.ALL_UPGRADES);
         }
+    }
+
+    /** J: back to human and the watch goes back into your inventory. */
+    public static void takeOff(ServerPlayer player) {
+        int tier = MorphData.tier(player);
+        if (tier <= 0) return;
+        Transformer.cancel(MorphData.root(player));
+        Transformer.setDial(player, -1);
+        if (MorphData.getForm(player) != MorphForm.NONE) {
+            Transformer.playHumanSequence(player, MorphData.getForm(player));
+        }
+        MorphData.setForm(player, MorphForm.NONE);
+        CompoundTag root = MorphData.root(player);
+        ItemStack watch = MorphWatchItem.makeWatch(MorphData.upgrades(player), MorphData.strapColour(player),
+                root.contains(MorphData.STRAP_NAME) ? root.getString(MorphData.STRAP_NAME) : null);
+        root.remove(MorphData.STRAP);
+        root.remove(MorphData.STRAP_NAME);
+        MorphData.setTier(player, 0);
+        MorphData.setUpgrades(player, 0);
+        MorphData.applyHealth(player, MorphForm.NONE);   // the emerald's hearts go with the watch
+        MorphData.sync(player);
+        if (!player.getInventory().add(watch)) {
+            player.drop(watch, false);
+        }
+        player.level().playSound(null, player.getX(), player.getY(), player.getZ(),
+                SoundEvents.ARMOR_EQUIP_GENERIC, SoundSource.PLAYERS, 1.0F, 1.0F);
+        tell(player, "Morph Watch taken off", ChatFormatting.GRAY);
     }
 
     /** A line of sparks from the wrist to the mob being scanned. */
